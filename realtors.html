@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minon Realtors — Find Properties for Sale, Rent & Shortlet in Nigeria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Bricolage+Grotesque:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--navy:#0D1B3E;--teal:#2EC4B6;--orange:#F4762A;--gold:#D4A017;--bg:#FFFBF0;--bg-card:#FFFFFF;--text-primary:#0D1B3E;--text-secondary:#4A5568;--text-muted:#8896AB;--border:rgba(13,27,62,0.1);--shadow:0 4px 24px rgba(13,27,62,0.08);--shadow-lg:0 20px 60px rgba(13,27,62,0.14);--success:#10B981;--error:#EF4444;}
+[data-theme="dark"]{--bg:#070E1F;--bg-card:#0F1A35;--text-primary:#F0F4FF;--text-secondary:#A8B8D8;--text-muted:#5A7090;--border:rgba(255,255,255,0.07);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text-primary);transition:background 0.3s,color 0.3s;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,27,62,0.97);backdrop-filter:blur(16px);height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 5%;}
+.nav-logo-text{font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;}
+.nav-logo-text span{color:var(--gold);}
+.nav-links{display:flex;align-items:center;gap:1.5rem;}
+.nav-links a{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.875rem;font-weight:500;transition:color 0.2s;}
+.nav-links a:hover{color:#fff;}
+.nav-cta{background:var(--gold)!important;color:var(--navy)!important;padding:7px 18px;border-radius:20px;font-weight:700!important;}
+.hero{min-height:100vh;background:linear-gradient(135deg,#0D1B3E 0%,#1a1200 60%,#0d0d00 100%);display:flex;align-items:center;padding:100px 5% 60px;position:relative;overflow:hidden;}
+.hero-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.2;}
+.orb1{width:500px;height:500px;background:var(--gold);top:-150px;right:-100px;}
+.orb2{width:350px;height:350px;background:var(--orange);bottom:-80px;left:5%;}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:60px 60px;}
+.hero-content{position:relative;z-index:2;max-width:680px;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(212,160,23,0.15);border:1px solid rgba(212,160,23,0.3);color:var(--gold);padding:6px 16px;border-radius:30px;font-size:0.78rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.5rem;}
+.hero-title{font-family:'Clash Display',sans-serif;font-size:clamp(3rem,5.5vw,4.8rem);font-weight:700;color:#fff;line-height:1.05;margin-bottom:1.5rem;}
+.hero-title span{color:var(--gold);}
+.hero-desc{color:rgba(255,255,255,0.65);font-size:1.1rem;line-height:1.75;margin-bottom:2.5rem;max-width:560px;}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:var(--navy);padding:14px 28px;border-radius:50px;font-weight:700;font-size:1rem;text-decoration:none;border:none;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;box-shadow:0 8px 30px rgba(212,160,23,0.35);transition:transform 0.2s;}
+.btn-primary:hover{transform:translateY(-2px);}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.08);color:#fff;padding:14px 28px;border-radius:50px;font-weight:600;font-size:1rem;text-decoration:none;border:1.5px solid rgba(255,255,255,0.2);cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;transition:all 0.2s;}
+.btn-ghost:hover{background:rgba(255,255,255,0.14);}
+.hero-stats{display:flex;gap:2.5rem;margin-top:3.5rem;padding-top:2.5rem;border-top:1px solid rgba(255,255,255,0.1);flex-wrap:wrap;}
+.hero-stat-num{font-family:'Clash Display',sans-serif;font-size:2rem;font-weight:700;color:#fff;}
+.hero-stat-num span{color:var(--gold);}
+.hero-stat-label{font-size:0.78rem;color:rgba(255,255,255,0.45);margin-top:2px;}
+section{padding:90px 5%;}
+.section-inner{max-width:1200px;margin:0 auto;}
+.eyebrow{display:inline-block;background:rgba(212,160,23,0.1);border:1px solid rgba(212,160,23,0.2);color:var(--gold);font-size:0.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:1rem;}
+.section-title{font-family:'Clash Display',sans-serif;font-size:clamp(2rem,3.5vw,3rem);font-weight:700;color:var(--text-primary);line-height:1.1;margin-bottom:1rem;}
+.section-desc{color:var(--text-muted);font-size:1rem;line-height:1.75;max-width:540px;margin-bottom:3rem;}
+
+/* SEARCH */
+.search-section{background:var(--bg-card);border-bottom:1px solid var(--border);padding:40px 5%;}
+.search-wrap{max-width:900px;margin:0 auto;}
+.search-bar{display:flex;gap:12px;background:var(--bg);border:2px solid var(--border);border-radius:50px;padding:8px 8px 8px 20px;align-items:center;transition:border-color 0.2s;}
+.search-bar:focus-within{border-color:var(--gold);}
+.search-bar input{flex:1;border:none;outline:none;background:transparent;font-family:'Bricolage Grotesque',sans-serif;font-size:0.95rem;color:var(--text-primary);}
+.search-bar input::placeholder{color:var(--text-muted);}
+.search-btn{background:var(--gold);color:var(--navy);border:none;border-radius:50px;padding:10px 24px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.875rem;font-weight:700;cursor:pointer;}
+.filter-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+.filter-select{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:8px 14px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.82rem;color:var(--text-primary);outline:none;cursor:pointer;}
+.filter-select:focus{border-color:var(--gold);}
+
+/* PROPERTY CARDS */
+.properties-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px;}
+.property-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:22px;overflow:hidden;transition:transform 0.25s,box-shadow 0.25s,border-color 0.25s;}
+.property-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);border-color:var(--gold);}
+.property-img{width:100%;height:210px;object-fit:cover;background:linear-gradient(135deg,rgba(212,160,23,0.12),rgba(244,118,42,0.08));display:flex;align-items:center;justify-content:center;font-size:4rem;position:relative;}
+.listing-badge{position:absolute;top:12px;left:12px;padding:4px 12px;border-radius:20px;font-size:0.7rem;font-weight:700;}
+.sale-badge{background:var(--orange);color:#fff;}
+.rent-badge{background:var(--teal);color:var(--navy);}
+.shortlet-badge{background:#6366f1;color:#fff;}
+.lease-badge{background:var(--gold);color:var(--navy);}
+.type-badge{position:absolute;top:12px;right:12px;background:rgba(13,27,62,0.85);color:#fff;font-size:0.68rem;font-weight:700;padding:3px 10px;border-radius:20px;}
+.negotiable-tag{position:absolute;bottom:12px;left:12px;background:rgba(46,196,182,0.9);color:var(--navy);font-size:0.68rem;font-weight:700;padding:3px 10px;border-radius:20px;}
+.property-body{padding:18px;}
+.property-price{font-family:'Clash Display',sans-serif;font-size:1.4rem;font-weight:700;color:var(--orange);margin-bottom:4px;}
+.property-title{font-weight:700;font-size:0.95rem;color:var(--text-primary);margin-bottom:6px;line-height:1.4;}
+.property-location{font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:4px;margin-bottom:12px;}
+.property-features{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap;}
+.prop-feat{display:flex;align-items:center;gap:4px;font-size:0.75rem;color:var(--text-muted);}
+.inquire-btn{width:100%;background:var(--gold);color:var(--navy);border:none;border-radius:10px;padding:11px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.875rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.inquire-btn:hover{background:#c8901a;}
+
+/* PROPERTY TYPES */
+.types-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;}
+.type-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:18px;padding:22px;text-align:center;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;}
+.type-card::before{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--c,var(--gold));transform:scaleX(0);transform-origin:left;transition:transform 0.3s;}
+.type-card:hover{border-color:var(--gold);transform:translateY(-3px);}
+.type-card:hover::before{transform:scaleX(1);}
+.type-icon{font-size:2.2rem;margin-bottom:10px;}
+.type-name{font-family:'Clash Display',sans-serif;font-size:0.9rem;font-weight:700;color:var(--text-primary);margin-bottom:3px;}
+.type-sub{font-size:0.72rem;color:var(--text-muted);}
+
+/* HOW IT WORKS */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;position:relative;}
+.steps::before{content:'';position:absolute;top:36px;left:12%;right:12%;height:2px;background:linear-gradient(90deg,var(--gold),var(--orange));}
+.step{text-align:center;position:relative;z-index:1;}
+.step-num{width:72px;height:72px;border-radius:50%;background:var(--bg-card);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-size:1.3rem;font-weight:700;color:var(--gold);margin:0 auto 1.2rem;box-shadow:0 0 0 6px rgba(212,160,23,0.08);}
+.step h4{font-family:'Clash Display',sans-serif;font-size:0.95rem;font-weight:700;color:var(--text-primary);margin-bottom:0.5rem;}
+.step p{font-size:0.82rem;color:var(--text-muted);line-height:1.6;}
+
+.realtor-cta{background:linear-gradient(135deg,#1a1200,#0d0d00);border-radius:24px;padding:3rem;text-align:center;margin-top:3rem;}
+.realtor-cta h3{font-family:'Clash Display',sans-serif;font-size:1.8rem;font-weight:700;color:#fff;margin-bottom:1rem;}
+.realtor-cta p{color:rgba(255,255,255,0.6);font-size:0.95rem;margin-bottom:2rem;}
+
+.cta-section{background:linear-gradient(135deg,#1a1200,var(--navy));padding:90px 5%;text-align:center;}
+.cta-section h2{font-family:'Clash Display',sans-serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:700;color:#fff;margin-bottom:1rem;}
+.cta-section p{color:rgba(255,255,255,0.6);font-size:1rem;margin-bottom:2.5rem;}
+footer{background:#050D1F;color:rgba(255,255,255,0.5);text-align:center;padding:2rem 5%;font-size:0.85rem;}
+footer strong{color:var(--gold);}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.loading{text-align:center;padding:3rem;color:var(--text-muted);}
+.empty-state{text-align:center;padding:3rem;color:var(--text-muted);}
+.empty-icon{font-size:3rem;margin-bottom:1rem;opacity:0.4;}
+@media(max-width:1024px){.steps{grid-template-columns:repeat(2,1fr);}.steps::before{display:none;}.properties-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:768px){.nav-links{display:none;}.hero-title{font-size:2.8rem;}.properties-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-logo-text">Min<span>o</span>n Realtors</div>
+  <div class="nav-links">
+    <a href="/">← Home</a>
+    <a href="#types">Property Types</a>
+    <a href="#listings">Listings</a>
+    <a href="/signup">List Property</a>
+    <a href="/signup" class="nav-cta">Find Property</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-orb orb1"></div><div class="hero-orb orb2"></div><div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">🏠 Minon Realtors</div>
+    <h1 class="hero-title">Find Your Perfect<br><span>Property</span> in Nigeria</h1>
+    <p class="hero-desc">Houses, land, apartments, shops, offices and warehouses — for sale, rent, shortlet and lease. Verified realtors, genuine listings, all across Nigeria.</p>
+    <div class="hero-actions">
+      <a href="#listings" class="btn-primary">🏠 Browse Properties</a>
+      <a href="/signup" class="btn-ghost">List My Property →</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hero-stat-num">✅</div><div class="hero-stat-label">Verified Realtors</div></div>
+      <div><div class="hero-stat-num">🏠</div><div class="hero-stat-label">All Property Types</div></div>
+      <div><div class="hero-stat-num">🇳🇬</div><div class="hero-stat-label">Nationwide</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<div class="search-section">
+  <div class="search-wrap">
+    <div class="search-bar">
+      <span>🔍</span>
+      <input type="text" id="searchInput" placeholder="Search location, property type..." onkeypress="if(event.key==='Enter')searchProperties()">
+      <button class="search-btn" onclick="searchProperties()">Search</button>
+    </div>
+    <div class="filter-row">
+      <select class="filter-select" id="listingFilter" onchange="loadProperties(true)">
+        <option value="">All Listings</option>
+        <option value="sale">For Sale</option>
+        <option value="rent">For Rent</option>
+        <option value="shortlet">Shortlet</option>
+        <option value="lease">Lease</option>
+      </select>
+      <select class="filter-select" id="typeFilter" onchange="loadProperties(true)">
+        <option value="">All Types</option>
+        <option value="house">🏠 House</option>
+        <option value="apartment">🏢 Apartment</option>
+        <option value="land">🌍 Land</option>
+        <option value="shop">🏪 Shop</option>
+        <option value="office">🏬 Office</option>
+        <option value="warehouse">🏭 Warehouse</option>
+        <option value="shortlet">🛎️ Shortlet</option>
+      </select>
+      <select class="filter-select" id="stateFilter" onchange="loadProperties(true)">
+        <option value="">All States</option>
+        <option>Anambra</option><option>Lagos</option><option>Abuja (FCT)</option>
+        <option>Rivers</option><option>Enugu</option><option>Delta</option>
+        <option>Imo</option><option>Oyo</option><option>Kano</option>
+      </select>
+      <select class="filter-select" id="sortFilter" onchange="loadProperties(true)">
+        <option value="latest">Latest First</option>
+        <option value="price_low">Price: Low to High</option>
+        <option value="price_high">Price: High to Low</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- PROPERTY TYPES -->
+<section id="types" style="padding-bottom:40px;">
+  <div class="section-inner">
+    <div class="reveal"><div class="eyebrow">Browse by Type</div><h2 class="section-title">What Are You Looking For?</h2></div>
+    <div class="types-grid">
+      <div class="type-card reveal" onclick="quickFilter('house','')" style="--c:#F4762A;"><div class="type-icon">🏠</div><div class="type-name">Houses</div><div class="type-sub">Residential homes</div></div>
+      <div class="type-card reveal" onclick="quickFilter('apartment','')" style="--c:#2EC4B6;"><div class="type-icon">🏢</div><div class="type-name">Apartments</div><div class="type-sub">Flats & condos</div></div>
+      <div class="type-card reveal" onclick="quickFilter('land','')" style="--c:var(--gold);"><div class="type-icon">🌍</div><div class="type-name">Land</div><div class="type-sub">Plots & acres</div></div>
+      <div class="type-card reveal" onclick="quickFilter('shop','')" style="--c:#6366f1;"><div class="type-icon">🏪</div><div class="type-name">Shops</div><div class="type-sub">Commercial spaces</div></div>
+      <div class="type-card reveal" onclick="quickFilter('office','')" style="--c:#10B981;"><div class="type-icon">🏬</div><div class="type-name">Offices</div><div class="type-sub">Business premises</div></div>
+      <div class="type-card reveal" onclick="quickFilter('warehouse','')" style="--c:#EF4444;"><div class="type-icon">🏭</div><div class="type-name">Warehouses</div><div class="type-sub">Storage & logistics</div></div>
+      <div class="type-card reveal" onclick="quickFilter('','shortlet')" style="--c:#EC4899;"><div class="type-icon">🛎️</div><div class="type-name">Shortlet</div><div class="type-sub">Short-term stays</div></div>
+      <div class="type-card reveal" onclick="quickFilter('','')" style="--c:var(--gold);"><div class="type-icon">📦</div><div class="type-name">All Properties</div><div class="type-sub">Browse everything</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- LISTINGS -->
+<section id="listings" style="padding-top:40px;background:var(--bg-card);border-top:1px solid var(--border);">
+  <div class="section-inner">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;" class="reveal">
+      <div><div class="eyebrow">Live Listings</div><h2 class="section-title" style="margin-bottom:0;">Properties Available Now</h2></div>
+      <span id="resultCount" style="font-size:0.85rem;color:var(--text-muted);"></span>
+    </div>
+    <div class="properties-grid" id="propertiesGrid">
+      <div class="loading" style="grid-column:1/-1;">Finding properties... 🏠</div>
+    </div>
+    <div style="text-align:center;margin-top:2.5rem;display:none;" id="loadMoreWrap">
+      <button onclick="loadMore()" style="background:var(--gold);color:var(--navy);border:none;border-radius:50px;padding:12px 32px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;">Load More Properties</button>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center;margin-bottom:3rem;"><div class="eyebrow">How It Works</div><h2 class="section-title">Find Your Property in 4 Steps</h2></div>
+    <div class="steps">
+      <div class="step reveal"><div class="step-num">01</div><h4>Search & Filter</h4><p>Browse verified listings by type, location, price and listing category.</p></div>
+      <div class="step reveal"><div class="step-num">02</div><h4>Contact Realtor</h4><p>Send an inquiry through the platform. Realtor responds within 24 hours.</p></div>
+      <div class="step reveal"><div class="step-num">03</div><h4>Inspect & Negotiate</h4><p>Schedule a physical viewing. Negotiate price if the listing is marked negotiable.</p></div>
+      <div class="step reveal"><div class="step-num">04</div><h4>Close the Deal</h4><p>Transfer payment, upload receipt, admin verifies, and you receive your documents.</p></div>
+    </div>
+
+    <div class="realtor-cta reveal">
+      <h3>🏠 Are You a Realtor?</h3>
+      <p>List your properties on Minon Realtors and connect with serious buyers and tenants across Nigeria. Verified realtors get featured placement. Pay ₦1,000 verification fee.</p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <a href="/signup" class="btn-primary">List My Properties →</a>
+        <a href="https://wa.me/2348118007861" target="_blank" class="btn-ghost">💬 Talk to Us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="section-inner">
+    <h2 class="reveal">Find Your Dream Property Today</h2>
+    <p class="reveal">Verified realtors. Genuine listings. All of Nigeria.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;" class="reveal">
+      <a href="#listings" class="btn-primary">🏠 Browse Properties</a>
+      <a href="https://wa.me/2348118007861" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;padding:14px 28px;border-radius:50px;font-weight:700;text-decoration:none;">💬 WhatsApp Us</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 <strong>Minon Realtors</strong> — A Branch of Minon Solutions · RC 8965878 · Awka, Anambra State</p>
+  <p style="margin-top:6px;"><a href="/" style="color:var(--gold);text-decoration:none;">← Back to Minon Solutions</a></p>
+</footer>
+
+<script>
+const SUPABASE_URL='https://rmwvrbpkxbxmbpidzbfe.supabase.co';
+const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtd3ZyYnBreGJ4bWJwaWR6YmZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MTE2ODIsImV4cCI6MjA5MjM4NzY4Mn0.aIbszMyL8lAMsF2T4-oSjHbuGr1b5-Az3fI4lGd0aYM';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+let offset=0;const LIMIT=9;let currentSearch='';
+
+const reveals=document.querySelectorAll('.reveal');
+const observer=new IntersectionObserver((entries)=>{entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('visible'),i*80);observer.unobserve(e.target);}});},{threshold:0.1});
+reveals.forEach(el=>observer.observe(el));
+
+async function loadProperties(reset=true){
+  if(reset)offset=0;
+  const grid=document.getElementById('propertiesGrid');
+  if(reset)grid.innerHTML='<div class="loading" style="grid-column:1/-1;">Finding properties... 🏠</div>';
+
+  const listingType=document.getElementById('listingFilter').value;
+  const propType=document.getElementById('typeFilter').value;
+  const state=document.getElementById('stateFilter').value;
+  const sort=document.getElementById('sortFilter').value;
+
+  let q=sb.from('properties').select('*').eq('is_available',true).range(offset,offset+LIMIT-1);
+  if(listingType)q=q.eq('listing_type',listingType);
+  if(propType)q=q.eq('property_type',propType);
+  if(state)q=q.eq('state',state);
+  if(currentSearch)q=q.or(`title.ilike.%${currentSearch}%,city.ilike.%${currentSearch}%,address.ilike.%${currentSearch}%`);
+  if(sort==='price_low')q=q.order('price',{ascending:true});
+  else if(sort==='price_high')q=q.order('price',{ascending:false});
+  else q=q.order('created_at',{ascending:false});
+
+  const{data,count}=await q;
+  if(reset)grid.innerHTML='';
+
+  if(!data?.length&&reset){
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">🏠</div><p>No properties found. <a href="/signup" style="color:var(--gold);font-weight:700;">List yours!</a></p></div>`;
+    document.getElementById('resultCount').textContent='';
+    return;
+  }
+
+  if(data?.length){
+    data.forEach(p=>grid.innerHTML+=propertyCard(p));
+    document.getElementById('resultCount').textContent=`${data.length} propert${data.length!==1?'ies':'y'} found`;
+  }
+
+  document.getElementById('loadMoreWrap').style.display=data?.length===LIMIT?'block':'none';
+  offset+=LIMIT;
+}
+
+function loadMore(){loadProperties(false);}
+
+const listingBadge={sale:'sale-badge',rent:'rent-badge',shortlet:'shortlet-badge',lease:'lease-badge'};
+const listingLabel={sale:'FOR SALE',rent:'FOR RENT',shortlet:'SHORTLET',lease:'LEASE'};
+const typeIcons={house:'🏠',apartment:'🏢',land:'🌍',shop:'🏪',office:'🏬',warehouse:'🏭',shortlet:'🛎️',other:'📦'};
+
+function propertyCard(p){
+  const img=p.media_urls?.length?`<img src="${p.media_urls[0]}" style="width:100%;height:100%;object-fit:cover;">`:(typeIcons[p.property_type]||'🏠');
+  const priceLabel=p.listing_type==='rent'?`₦${fmtLarge(p.price)}/yr`:p.listing_type==='shortlet'?`₦${fmtLarge(p.price)}/night`:`₦${fmtLarge(p.price)}`;
+  return`<div class="property-card">
+    <div class="property-img">
+      ${img}
+      <div class="listing-badge ${listingBadge[p.listing_type]||'sale-badge'}">${listingLabel[p.listing_type]||'FOR SALE'}</div>
+      <div class="type-badge">${(p.property_type||'property').toUpperCase()}</div>
+      ${p.negotiable?'<div class="negotiable-tag">Negotiable</div>':''}
+    </div>
+    <div class="property-body">
+      <div class="property-price">${priceLabel}</div>
+      <div class="property-title">${p.title}</div>
+      <div class="property-location">📍 ${p.city||''}${p.state?', '+p.state:''}</div>
+      <div class="property-features">
+        ${p.bedrooms?`<div class="prop-feat">🛏️ ${p.bedrooms} Bed${p.bedrooms!==1?'s':''}</div>`:''}
+        ${p.bathrooms?`<div class="prop-feat">🚿 ${p.bathrooms} Bath${p.bathrooms!==1?'s':''}</div>`:''}
+        ${p.size_sqm?`<div class="prop-feat">📐 ${p.size_sqm}sqm</div>`:''}
+      </div>
+      <button class="inquire-btn" onclick="inquireProperty('${p.id}','${p.title.replace(/'/g,"\\'")}')">🏠 Inquire About This Property</button>
+    </div>
+  </div>`;
+}
+
+function quickFilter(type,listing){
+  document.getElementById('typeFilter').value=type;
+  document.getElementById('listingFilter').value=listing;
+  loadProperties(true);
+  document.getElementById('listings').scrollIntoView({behavior:'smooth'});
+}
+
+function searchProperties(){
+  currentSearch=document.getElementById('searchInput').value.trim();
+  loadProperties(true);
+}
+
+async function inquireProperty(id,title){
+  const{data:{session}}=await sb.auth.getSession();
+  if(!session){
+    if(confirm(`To inquire about "${title}", you need to sign in first. Sign in now?`))window.location.href='/login';
+    return;
+  }
+  alert(`To inquire about this property:\n\n1. Sign in and send a message through your dashboard\n2. Or WhatsApp us directly: 08118007861\n3. We'll connect you with the realtor within 24 hours\n\nProperty: ${title}`);
+}
+
+function fmtLarge(n){
+  const num=Number(n||0);
+  if(num>=1000000)return(num/1000000).toFixed(1)+'M';
+  if(num>=1000)return(num/1000).toFixed(0)+'K';
+  return num.toLocaleString('en-NG');
+}
+
+window.addEventListener('DOMContentLoaded',()=>loadProperties(true));
+</script>
+</body>
+</html>

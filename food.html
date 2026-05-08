@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minon Place — Order Food Online in Nigeria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Bricolage+Grotesque:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--navy:#0D1B3E;--teal:#2EC4B6;--orange:#F4762A;--red:#EF4444;--bg:#FFF8F0;--bg-card:#FFFFFF;--text-primary:#0D1B3E;--text-secondary:#4A5568;--text-muted:#8896AB;--border:rgba(13,27,62,0.1);--shadow:0 4px 24px rgba(13,27,62,0.08);--shadow-lg:0 20px 60px rgba(13,27,62,0.14);--success:#10B981;--error:#EF4444;}
+[data-theme="dark"]{--bg:#070E1F;--bg-card:#0F1A35;--text-primary:#F0F4FF;--text-secondary:#A8B8D8;--text-muted:#5A7090;--border:rgba(255,255,255,0.07);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text-primary);transition:background 0.3s,color 0.3s;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,27,62,0.97);backdrop-filter:blur(16px);height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 5%;}
+.nav-logo-text{font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;}
+.nav-logo-text span{color:var(--red);}
+.nav-links{display:flex;align-items:center;gap:1.5rem;}
+.nav-links a{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.875rem;font-weight:500;transition:color 0.2s;}
+.nav-links a:hover{color:#fff;}
+.nav-cta{background:var(--red)!important;color:#fff!important;padding:7px 18px;border-radius:20px;font-weight:700!important;}
+.hero{min-height:100vh;background:linear-gradient(135deg,#1a0500 0%,#2d0a00 50%,#0D1B3E 100%);display:flex;align-items:center;padding:100px 5% 60px;position:relative;overflow:hidden;}
+.hero-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.25;}
+.orb1{width:500px;height:500px;background:var(--red);top:-150px;right:-100px;}
+.orb2{width:350px;height:350px;background:var(--orange);bottom:-80px;left:5%;}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:60px 60px;}
+.hero-content{position:relative;z-index:2;max-width:650px;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:6px 16px;border-radius:30px;font-size:0.78rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.5rem;}
+.hero-title{font-family:'Clash Display',sans-serif;font-size:clamp(3rem,5.5vw,4.8rem);font-weight:700;color:#fff;line-height:1.05;margin-bottom:1.5rem;}
+.hero-title span{color:#f87171;}
+.hero-desc{color:rgba(255,255,255,0.65);font-size:1.1rem;line-height:1.75;margin-bottom:2.5rem;max-width:520px;}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--red);color:#fff;padding:14px 28px;border-radius:50px;font-weight:700;font-size:1rem;text-decoration:none;border:none;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;box-shadow:0 8px 30px rgba(239,68,68,0.35);transition:transform 0.2s,box-shadow 0.2s;}
+.btn-primary:hover{transform:translateY(-2px);}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.08);color:#fff;padding:14px 28px;border-radius:50px;font-weight:600;font-size:1rem;text-decoration:none;border:1.5px solid rgba(255,255,255,0.2);cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;transition:all 0.2s;}
+.btn-ghost:hover{background:rgba(255,255,255,0.14);}
+.hero-stats{display:flex;gap:2.5rem;margin-top:3.5rem;padding-top:2.5rem;border-top:1px solid rgba(255,255,255,0.1);flex-wrap:wrap;}
+.hero-stat-num{font-family:'Clash Display',sans-serif;font-size:2rem;font-weight:700;color:#fff;}
+.hero-stat-num span{color:#f87171;}
+.hero-stat-label{font-size:0.78rem;color:rgba(255,255,255,0.45);margin-top:2px;}
+section{padding:90px 5%;}
+.section-inner{max-width:1200px;margin:0 auto;}
+.eyebrow{display:inline-block;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:var(--red);font-size:0.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:1rem;}
+.section-title{font-family:'Clash Display',sans-serif;font-size:clamp(2rem,3.5vw,3rem);font-weight:700;color:var(--text-primary);line-height:1.1;margin-bottom:1rem;}
+.section-desc{color:var(--text-muted);font-size:1rem;line-height:1.75;max-width:540px;margin-bottom:3rem;}
+
+/* LOCATION SEARCH */
+.location-section{background:var(--bg-card);border-bottom:1px solid var(--border);padding:40px 5%;}
+.location-wrap{max-width:700px;margin:0 auto;text-align:center;}
+.location-bar{display:flex;gap:12px;background:var(--bg);border:2px solid var(--border);border-radius:50px;padding:8px 8px 8px 20px;align-items:center;transition:border-color 0.2s;}
+.location-bar:focus-within{border-color:var(--red);}
+.location-bar input{flex:1;border:none;outline:none;background:transparent;font-family:'Bricolage Grotesque',sans-serif;font-size:0.95rem;color:var(--text-primary);}
+.location-bar input::placeholder{color:var(--text-muted);}
+.search-btn{background:var(--red);color:#fff;border:none;border-radius:50px;padding:10px 24px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.875rem;font-weight:700;cursor:pointer;}
+.category-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px;}
+.chip{background:var(--bg);border:1.5px solid var(--border);color:var(--text-secondary);padding:6px 16px;border-radius:20px;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.chip:hover,.chip.active{background:var(--red);border-color:var(--red);color:#fff;}
+
+/* RESTAURANTS */
+.restaurants-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
+.resto-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:20px;overflow:hidden;transition:transform 0.25s,box-shadow 0.25s,border-color 0.25s;cursor:pointer;}
+.resto-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg);border-color:var(--red);}
+.resto-banner{width:100%;height:180px;object-fit:cover;background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(244,118,42,0.08));display:flex;align-items:center;justify-content:center;font-size:3.5rem;position:relative;}
+.resto-open-badge{position:absolute;top:12px;left:12px;padding:4px 12px;border-radius:20px;font-size:0.7rem;font-weight:700;}
+.open-badge{background:rgba(16,185,129,0.9);color:#fff;}
+.closed-badge{background:rgba(239,68,68,0.9);color:#fff;}
+.featured-badge{position:absolute;top:12px;right:12px;background:var(--orange);color:#fff;font-size:0.68rem;font-weight:700;padding:3px 10px;border-radius:20px;}
+.resto-body{padding:16px;}
+.resto-name{font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:4px;}
+.resto-location{font-size:0.78rem;color:var(--text-muted);margin-bottom:10px;display:flex;align-items:center;gap:4px;}
+.resto-meta{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.resto-rating{font-size:0.78rem;color:var(--text-secondary);display:flex;align-items:center;gap:4px;}
+.resto-hours{font-size:0.75rem;color:var(--text-muted);}
+.order-btn{width:100%;background:var(--red);color:#fff;border:none;border-radius:10px;padding:11px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.875rem;font-weight:700;cursor:pointer;transition:background 0.2s;}
+.order-btn:hover{background:#c53030;}
+.order-btn:disabled{background:var(--text-muted);cursor:not-allowed;}
+
+/* HOW IT WORKS */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;position:relative;}
+.steps::before{content:'';position:absolute;top:36px;left:12%;right:12%;height:2px;background:linear-gradient(90deg,var(--red),var(--orange));}
+.step{text-align:center;position:relative;z-index:1;}
+.step-num{width:72px;height:72px;border-radius:50%;background:var(--bg-card);border:3px solid var(--red);display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-size:1.3rem;font-weight:700;color:var(--red);margin:0 auto 1.2rem;box-shadow:0 0 0 6px rgba(239,68,68,0.08);}
+.step h4{font-family:'Clash Display',sans-serif;font-size:0.95rem;font-weight:700;color:var(--text-primary);margin-bottom:0.5rem;}
+.step p{font-size:0.82rem;color:var(--text-muted);line-height:1.6;}
+
+/* FOOD CATEGORIES */
+.food-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:12px;}
+.food-cat{background:var(--bg-card);border:1.5px solid var(--border);border-radius:14px;padding:16px;text-align:center;cursor:pointer;transition:all 0.2s;}
+.food-cat:hover{border-color:var(--red);transform:translateY(-2px);}
+.food-cat-icon{font-size:1.8rem;margin-bottom:6px;}
+.food-cat-name{font-size:0.75rem;font-weight:700;color:var(--text-primary);}
+
+/* RESTAURANT OWNER CTA */
+.owner-cta{background:linear-gradient(135deg,#1a0500,#2d0a00);border-radius:24px;padding:3rem;text-align:center;margin-top:3rem;}
+.owner-cta h3{font-family:'Clash Display',sans-serif;font-size:1.8rem;font-weight:700;color:#fff;margin-bottom:1rem;}
+.owner-cta p{color:rgba(255,255,255,0.6);font-size:0.95rem;margin-bottom:2rem;}
+
+.cta-section{background:linear-gradient(135deg,#1a0500,#0D1B3E);padding:90px 5%;text-align:center;}
+.cta-section h2{font-family:'Clash Display',sans-serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:700;color:#fff;margin-bottom:1rem;}
+.cta-section p{color:rgba(255,255,255,0.6);font-size:1rem;margin-bottom:2.5rem;}
+footer{background:#050D1F;color:rgba(255,255,255,0.5);text-align:center;padding:2rem 5%;font-size:0.85rem;}
+footer strong{color:var(--red);}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.loading{text-align:center;padding:3rem;color:var(--text-muted);}
+@media(max-width:1024px){.steps{grid-template-columns:repeat(2,1fr);}.steps::before{display:none;}}
+@media(max-width:768px){.nav-links{display:none;}.hero-title{font-size:2.8rem;}.restaurants-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-logo-text">Min<span>o</span>n Place</div>
+  <div class="nav-links">
+    <a href="/">← Home</a>
+    <a href="#restaurants">Restaurants</a>
+    <a href="#how">How It Works</a>
+    <a href="/signup">Sign Up</a>
+    <a href="/signup" class="nav-cta">Order Now</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-orb orb1"></div><div class="hero-orb orb2"></div><div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">🍽️ Minon Place</div>
+    <h1 class="hero-title">Order <span>Delicious</span><br>Food Online</h1>
+    <p class="hero-desc">Discover restaurants near you and order your favourite meals online. From Jollof Rice to pizza, local delicacies to fast food — delivered hot to your door.</p>
+    <div class="hero-actions">
+      <a href="#restaurants" class="btn-primary">🍔 Order Food Now</a>
+      <a href="#how" class="btn-ghost">How It Works →</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hero-stat-num">🍽️</div><div class="hero-stat-label">Multiple Restaurants</div></div>
+      <div><div class="hero-stat-num">🔥</div><div class="hero-stat-label">Hot & Fresh</div></div>
+      <div><div class="hero-stat-num">🚚</div><div class="hero-stat-label">Fast Delivery</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<div class="location-section">
+  <div class="location-wrap">
+    <div class="location-bar">
+      <span>📍</span>
+      <input type="text" id="citySearch" placeholder="Enter your city (e.g. Awka, Onitsha, Enugu)..." onkeypress="if(event.key==='Enter')searchRestaurants()">
+      <button class="search-btn" onclick="searchRestaurants()">Find Food</button>
+    </div>
+    <div class="category-chips">
+      <span class="chip active" onclick="filterFood('',this)">All</span>
+      <span class="chip" onclick="filterFood('Rice',this)">🍚 Rice</span>
+      <span class="chip" onclick="filterFood('Soup',this)">🥘 Soups</span>
+      <span class="chip" onclick="filterFood('Grills',this)">🥩 Grills</span>
+      <span class="chip" onclick="filterFood('Snacks',this)">🍟 Snacks</span>
+      <span class="chip" onclick="filterFood('Drinks',this)">🥤 Drinks</span>
+      <span class="chip" onclick="filterFood('Pasta',this)">🍝 Pasta</span>
+    </div>
+  </div>
+</div>
+
+<!-- FOOD CATEGORIES -->
+<section style="padding-bottom:40px;">
+  <div class="section-inner">
+    <div class="reveal"><div class="eyebrow">Browse Food</div><h2 class="section-title">What Are You Craving?</h2></div>
+    <div class="food-cats">
+      <div class="food-cat reveal" onclick="filterFood('Rice',null)"><div class="food-cat-icon">🍚</div><div class="food-cat-name">Rice</div></div>
+      <div class="food-cat reveal" onclick="filterFood('Soup',null)"><div class="food-cat-icon">🥘</div><div class="food-cat-name">Soups</div></div>
+      <div class="food-cat reveal" onclick="filterFood('Swallow',null)"><div class="food-cat-icon">🫓</div><div class="food-cat-name">Swallow</div></div>
+      <div class="food-cat reveal" onclick="filterFood('Protein',null)"><div class="food-cat-icon">🍗</div><div class="food-cat-name">Protein</div></div>
+      <div class="food-cat reveal" onclick="filterFood('Grills',null)"><div class="food-cat-icon">🥩</div><div class="food-cat-name">Grills</div></div>
+      <div class="food-cat reveal" onclick="filterFood('Pasta',null)"><div class="food-cat-icon">🍝</div><div class="food-cat-name">Pasta</div></div>
+      <div class="food-cat reveal" onclick="filterFood('Snacks',null)"><div class="food-cat-icon">🍟</div><div class="food-cat-name">Snacks</div></div>
+      <div class="food-cat reveal" onclick="filterFood('Desserts',null)"><div class="food-cat-icon">🍰</div><div class="food-cat-name">Desserts</div></div>
+      <div class="food-cat reveal" onclick="filterFood('Drinks',null)"><div class="food-cat-icon">🥤</div><div class="food-cat-name">Drinks</div></div>
+      <div class="food-cat reveal" onclick="filterFood('',null)"><div class="food-cat-icon">🍽️</div><div class="food-cat-name">All Food</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- RESTAURANTS -->
+<section id="restaurants" style="padding-top:40px;background:var(--bg-card);border-top:1px solid var(--border);">
+  <div class="section-inner">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;" class="reveal">
+      <div><div class="eyebrow">Open Restaurants</div><h2 class="section-title" style="margin-bottom:0;">Order From These Restaurants</h2></div>
+      <select id="sortSelect" onchange="loadRestaurants()" style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:8px 14px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.85rem;color:var(--text-primary);outline:none;">
+        <option value="open">Open First</option>
+        <option value="rating">Top Rated</option>
+        <option value="latest">Newest</option>
+      </select>
+    </div>
+    <div class="restaurants-grid" id="restaurantsGrid">
+      <div class="loading" style="grid-column:1/-1;">Finding restaurants near you... 🍽️</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center;margin-bottom:3rem;"><div class="eyebrow">How It Works</div><h2 class="section-title">Order in 4 Easy Steps</h2></div>
+    <div class="steps">
+      <div class="step reveal"><div class="step-num">01</div><h4>Find a Restaurant</h4><p>Browse open restaurants near you. Filter by food type, rating or location.</p></div>
+      <div class="step reveal"><div class="step-num">02</div><h4>Choose Your Meal</h4><p>Browse the menu, select your items and add them to your cart.</p></div>
+      <div class="step reveal"><div class="step-num">03</div><h4>Pay & Confirm</h4><p>Transfer to Moniepoint, upload receipt. Restaurant confirms your order immediately.</p></div>
+      <div class="step reveal"><div class="step-num">04</div><h4>Enjoy Your Food!</h4><p>Restaurant prepares your meal, rider picks it up and delivers hot to your door.</p></div>
+    </div>
+
+    <!-- Restaurant Owner CTA -->
+    <div class="owner-cta reveal">
+      <h3>🍽️ Own a Restaurant?</h3>
+      <p>List your restaurant on Minon Place and start receiving online food orders. Reach more customers and grow your revenue. Pay ₦1,000 verification fee to get started.</p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <a href="/signup" class="btn-primary">List My Restaurant →</a>
+        <a href="https://wa.me/2348118007861" target="_blank" class="btn-ghost">💬 Ask Us First</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="section-inner">
+    <h2 class="reveal">Hungry? Order Now!</h2>
+    <p class="reveal">Fresh food from your favourite restaurants, delivered fast.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;" class="reveal">
+      <a href="#restaurants" class="btn-primary">🍔 Browse Restaurants</a>
+      <a href="https://wa.me/2348118007861" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;padding:14px 28px;border-radius:50px;font-weight:700;text-decoration:none;">💬 WhatsApp Us</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 <strong>Minon Place</strong> — A Branch of Minon Solutions · RC 8965878 · Awka, Anambra State</p>
+  <p style="margin-top:6px;"><a href="/" style="color:var(--red);text-decoration:none;">← Back to Minon Solutions</a></p>
+</footer>
+
+<script>
+const SUPABASE_URL='https://rmwvrbpkxbxmbpidzbfe.supabase.co';
+const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtd3ZyYnBreGJ4bWJwaWR6YmZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MTE2ODIsImV4cCI6MjA5MjM4NzY4Mn0.aIbszMyL8lAMsF2T4-oSjHbuGr1b5-Az3fI4lGd0aYM';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+let currentCity='';let currentFoodCat='';
+
+const reveals=document.querySelectorAll('.reveal');
+const observer=new IntersectionObserver((entries)=>{entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('visible'),i*80);observer.unobserve(e.target);}});},{threshold:0.1});
+reveals.forEach(el=>observer.observe(el));
+
+async function loadRestaurants(){
+  const grid=document.getElementById('restaurantsGrid');
+  grid.innerHTML='<div class="loading" style="grid-column:1/-1;">Finding restaurants... 🍽️</div>';
+  const sort=document.getElementById('sortSelect').value;
+  let q=sb.from('restaurants').select('*').eq('is_verified',true);
+  if(currentCity)q=q.ilike('city',`%${currentCity}%`);
+  if(sort==='open')q=q.eq('is_open',true);
+  if(sort==='rating')q=q.order('rating',{ascending:false});
+  else q=q.order('created_at',{ascending:false});
+  q=q.limit(12);
+  const{data}=await q;
+  grid.innerHTML='';
+  if(!data?.length){
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);"><div style="font-size:3rem;margin-bottom:1rem;opacity:0.4;">🍽️</div><p>No restaurants yet in ${currentCity||'your area'}. <a href="/signup" style="color:var(--red);font-weight:700;">List yours!</a></p></div>`;
+    return;
+  }
+  data.forEach(r=>grid.innerHTML+=restoCard(r));
+}
+
+function restoCard(r){
+  return`<div class="resto-card" onclick="viewRestaurant('${r.id}')">
+    <div class="resto-banner">
+      ${r.banner_url?`<img src="${r.banner_url}" style="width:100%;height:100%;object-fit:cover;">`:'🍽️'}
+      <div class="resto-open-badge ${r.is_open?'open-badge':'closed-badge'}">${r.is_open?'🟢 Open':'🔴 Closed'}</div>
+      ${r.is_featured?'<div class="featured-badge">⭐ Featured</div>':''}
+    </div>
+    <div class="resto-body">
+      <div class="resto-name">${r.name}</div>
+      <div class="resto-location">📍 ${r.address||''}, ${r.city||''}</div>
+      <div class="resto-meta">
+        <div class="resto-rating">⭐ ${r.rating||'New'}</div>
+        <div class="resto-hours">🕐 ${r.opening_time||''}–${r.closing_time||''}</div>
+      </div>
+      <button class="order-btn" ${!r.is_open?'disabled':''} onclick="event.stopPropagation();orderFromResto('${r.id}','${r.name}')">${r.is_open?'🍔 Order Now':'Currently Closed'}</button>
+    </div>
+  </div>`;
+}
+
+async function viewRestaurant(id){
+  const{data:menu}=await sb.from('menu_items').select('*').eq('restaurant_id',id).eq('is_available',true).limit(6);
+  if(!menu?.length){alert('No menu items available yet. Check back soon!');return;}
+  const items=menu.map(m=>`• ${m.name} — ₦${fmt(m.price)}`).join('\n');
+  alert(`Menu Items:\n\n${items}\n\nTo order, sign in and place your order through the platform.\nOr WhatsApp: 08118007861`);
+}
+
+async function orderFromResto(id,name){
+  const{data:{session}}=await sb.auth.getSession();
+  if(!session){window.location.href='/login';return;}
+  alert(`To order from ${name}:\n\n1. Sign in to your account\n2. Browse the full menu\n3. Add items to cart\n4. Transfer payment to:\nMinon Solutions · 6383313367 · Moniepoint\n5. Upload receipt in dashboard\n\nWhatsApp: 08118007861`);
+}
+
+function filterFood(cat,el){
+  currentFoodCat=cat;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  if(el)el.classList.add('active');
+  loadRestaurants();
+}
+
+function searchRestaurants(){
+  currentCity=document.getElementById('citySearch').value.trim();
+  loadRestaurants();
+}
+
+function fmt(n){return Number(n||0).toLocaleString('en-NG');}
+window.addEventListener('DOMContentLoaded',loadRestaurants);
+</script>
+</body>
+</html>

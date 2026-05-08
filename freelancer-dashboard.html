@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Freelancer Dashboard — Minon Solutions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Bricolage+Grotesque:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --navy:#0D1B3E;--teal:#2EC4B6;--orange:#F4762A;--indigo:#6366f1;
+  --bg:#F5F0FF;--bg-card:#FFFFFF;--bg-sidebar:#0D1B3E;
+  --text-primary:#0D1B3E;--text-secondary:#4A5568;--text-muted:#8896AB;
+  --border:rgba(13,27,62,0.1);--shadow:0 4px 24px rgba(13,27,62,0.08);
+  --shadow-lg:0 20px 60px rgba(13,27,62,0.12);
+  --success:#10B981;--error:#EF4444;--warning:#F59E0B;
+  --sidebar-w:255px;
+}
+[data-theme="dark"]{
+  --bg:#070E1F;--bg-card:#0F1A35;--bg-sidebar:#080F22;
+  --text-primary:#F0F4FF;--text-secondary:#A8B8D8;--text-muted:#5A7090;
+  --border:rgba(255,255,255,0.07);--shadow:0 4px 24px rgba(0,0,0,0.3);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text-primary);display:flex;min-height:100vh;transition:background 0.3s,color 0.3s;}
+
+.sidebar{width:var(--sidebar-w);background:var(--bg-sidebar);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:200;}
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding:20px;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.06);}
+.sidebar-logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--indigo),var(--teal));display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;color:#fff;font-size:1rem;}
+.sidebar-logo-text{font-family:'Clash Display',sans-serif;font-size:0.95rem;font-weight:700;color:#fff;}
+.sidebar-logo-text span{color:var(--orange);}
+.freelancer-badge{margin:10px 16px 0;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:#818cf8;font-size:0.68rem;font-weight:700;padding:4px 10px;border-radius:20px;text-align:center;letter-spacing:1px;}
+.sidebar-nav{flex:1;overflow-y:auto;padding:14px 12px;}
+.nav-section-label{font-size:0.63rem;font-weight:700;color:rgba(255,255,255,0.22);letter-spacing:1.5px;text-transform:uppercase;padding:12px 8px 6px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:rgba(255,255,255,0.5);font-size:0.875rem;font-weight:500;cursor:pointer;transition:all 0.2s;margin-bottom:2px;text-decoration:none;position:relative;}
+.nav-item:hover{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.9);}
+.nav-item.active{background:rgba(99,102,241,0.15);color:#818cf8;}
+.nav-item.active::before{content:'';position:absolute;left:0;top:25%;bottom:25%;width:3px;background:var(--indigo);border-radius:0 2px 2px 0;}
+.nav-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--error);color:#fff;font-size:0.63rem;font-weight:700;padding:2px 7px;border-radius:10px;}
+.nav-badge.indigo{background:var(--indigo);}
+.sidebar-footer{padding:16px;border-top:1px solid rgba(255,255,255,0.06);}
+.sidebar-user{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:rgba(255,255,255,0.04);}
+.sidebar-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),var(--teal));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.9rem;flex-shrink:0;}
+.sidebar-user-name{font-size:0.82rem;font-weight:700;color:#fff;}
+.sidebar-user-role{font-size:0.68rem;color:#818cf8;}
+
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{height:64px;background:var(--bg-card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:100;}
+.page-title{font-family:'Clash Display',sans-serif;font-size:1.15rem;font-weight:700;color:var(--text-primary);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.topbar-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;position:relative;transition:border-color 0.2s;}
+.topbar-btn:hover{border-color:var(--indigo);}
+.notif-dot{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--error);border:2px solid var(--bg-card);}
+
+.content{flex:1;padding:24px;overflow-y:auto;}
+.content-panel{display:none;}
+.content-panel.active{display:block;animation:fadeIn 0.3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+.card{background:var(--bg-card);border-radius:16px;padding:20px;border:1px solid var(--border);}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.card-title{font-family:'Clash Display',sans-serif;font-size:1rem;font-weight:700;color:var(--text-primary);}
+.card-action{font-size:0.8rem;color:var(--teal);cursor:pointer;font-weight:600;}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.stat-card{background:var(--bg-card);border-radius:16px;padding:18px;border:1px solid var(--border);position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--c,var(--indigo));}
+.stat-label{font-size:0.75rem;color:var(--text-muted);font-weight:600;letter-spacing:0.5px;margin-bottom:6px;}
+.stat-value{font-family:'Clash Display',sans-serif;font-size:1.8rem;font-weight:700;color:var(--text-primary);}
+.stat-icon{position:absolute;top:14px;right:14px;font-size:1.5rem;opacity:0.15;}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;}
+.grid-60-40{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;margin-bottom:20px;}
+
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:12px;font-size:0.875rem;color:var(--text-secondary);border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(99,102,241,0.02);}
+
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;}
+.badge-success{background:rgba(16,185,129,0.12);color:var(--success);}
+.badge-error{background:rgba(239,68,68,0.12);color:var(--error);}
+.badge-warning{background:rgba(245,158,11,0.12);color:var(--warning);}
+.badge-teal{background:rgba(46,196,182,0.12);color:var(--teal);}
+.badge-orange{background:rgba(244,118,42,0.12);color:var(--orange);}
+.badge-indigo{background:rgba(99,102,241,0.12);color:var(--indigo);}
+.badge-muted{background:rgba(88,96,112,0.12);color:var(--text-muted);}
+
+/* SERVICE LISTING CARD */
+.services-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}
+.service-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;transition:transform 0.2s,border-color 0.2s;}
+.service-card:hover{transform:translateY(-3px);border-color:var(--indigo);}
+.service-thumb{width:100%;height:120px;background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(46,196,182,0.08));display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;}
+.service-body{padding:14px;}
+.service-title{font-weight:700;font-size:0.9rem;color:var(--text-primary);margin-bottom:4px;}
+.service-category{font-size:0.72rem;color:var(--indigo);font-weight:600;margin-bottom:8px;}
+.service-price{font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;color:var(--orange);}
+.service-meta{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+
+/* JOB REQUEST CARD */
+.job-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;transition:border-color 0.2s;}
+.job-card:hover{border-color:var(--indigo);}
+.job-card.new{border-color:var(--indigo);background:rgba(99,102,241,0.02);}
+
+/* WALLET */
+.wallet-card{background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:20px;padding:24px;position:relative;overflow:hidden;color:#fff;margin-bottom:16px;}
+.wallet-card::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;background:radial-gradient(circle,rgba(99,102,241,0.3) 0%,transparent 70%);border-radius:50%;}
+.wallet-label{font-size:0.72rem;color:rgba(255,255,255,0.5);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.wallet-balance{font-family:'Clash Display',sans-serif;font-size:2.4rem;font-weight:700;color:#fff;}
+
+/* FORMS */
+.form-group{margin-bottom:14px;}
+.form-label{display:block;font-size:0.78rem;font-weight:700;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;}
+.form-input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.875rem;color:var(--text-primary);outline:none;transition:border-color 0.2s;}
+.form-input:focus{border-color:var(--indigo);}
+.form-input::placeholder{color:var(--text-muted);}
+textarea.form-input{resize:vertical;}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+.action-btn{padding:7px 14px;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;border:none;font-family:'Bricolage Grotesque',sans-serif;transition:all 0.2s;}
+.btn-primary-sm{background:var(--orange);color:#fff;}
+.btn-primary-sm:hover{background:#d95f15;}
+.btn-indigo-sm{background:rgba(99,102,241,0.12);color:var(--indigo);}
+.btn-indigo-sm:hover{background:var(--indigo);color:#fff;}
+.btn-teal-sm{background:rgba(46,196,182,0.12);color:var(--teal);}
+.btn-teal-sm:hover{background:var(--teal);color:#fff;}
+.btn-ghost-sm{background:var(--bg);color:var(--text-secondary);border:1px solid var(--border);}
+.btn-ghost-sm:hover{border-color:var(--indigo);}
+.btn-danger-sm{background:rgba(239,68,68,0.12);color:var(--error);}
+.btn-danger-sm:hover{background:var(--error);color:#fff;}
+.btn-success-sm{background:rgba(16,185,129,0.12);color:var(--success);}
+.btn-success-sm:hover{background:var(--success);color:#fff;}
+
+/* PORTFOLIO */
+.portfolio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+.portfolio-item{background:var(--bg);border:1.5px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color 0.2s,transform 0.2s;}
+.portfolio-item:hover{border-color:var(--indigo);transform:translateY(-2px);}
+.portfolio-thumb{height:130px;background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(46,196,182,0.06));display:flex;align-items:center;justify-content:center;font-size:2.5rem;}
+.portfolio-info{padding:10px;}
+.portfolio-title{font-size:0.82rem;font-weight:700;color:var(--text-primary);}
+.portfolio-type{font-size:0.7rem;color:var(--indigo);}
+
+/* REVIEW */
+.review-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;}
+.stars{color:#F59E0B;letter-spacing:2px;}
+
+.verif-banner{border-radius:14px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px;}
+.verif-banner.pending{background:rgba(245,158,11,0.1);border:1.5px solid rgba(245,158,11,0.3);}
+.verif-banner.verified{background:rgba(16,185,129,0.08);border:1.5px solid rgba(16,185,129,0.25);}
+
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg-card);border-radius:20px;padding:2rem;max-width:520px;width:90%;border:1px solid var(--border);box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+.modal-title{font-family:'Clash Display',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text-primary);}
+.modal-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-muted);}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);z-index:9999;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:12px 18px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow-lg);opacity:0;transition:all 0.3s;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.empty-state{text-align:center;padding:2.5rem;color:var(--text-muted);}
+.empty-state-icon{font-size:2.5rem;margin-bottom:0.8rem;opacity:0.4;}
+
+@media(max-width:1024px){.stats-row{grid-template-columns:repeat(2,1fr);}.grid-60-40,.grid-2{grid-template-columns:1fr;}}
+@media(max-width:768px){.sidebar{transform:translateX(-100%);}.main{margin-left:0;}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <a href="/" class="sidebar-logo">
+    <div class="sidebar-logo-icon">M</div>
+    <div><div class="sidebar-logo-text">Min<span>o</span>n Solutions</div></div>
+  </a>
+  <div class="freelancer-badge">💼 FREELANCER PANEL</div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Work</div>
+    <a class="nav-item active" onclick="showPanel('overview')"><span class="nav-icon">📊</span> Overview</a>
+    <a class="nav-item" onclick="showPanel('services')"><span class="nav-icon">💼</span> My Services <span class="nav-badge indigo" id="badgeServices">0</span></a>
+    <a class="nav-item" onclick="showPanel('add-service')"><span class="nav-icon">➕</span> Add Service</a>
+    <a class="nav-item" onclick="showPanel('job-requests')"><span class="nav-icon">📋</span> Job Requests <span class="nav-badge" id="badgeJobs">0</span></a>
+    <a class="nav-item" onclick="showPanel('active-jobs')"><span class="nav-icon">🔥</span> Active Jobs <span class="nav-badge indigo" id="badgeActive">0</span></a>
+    <a class="nav-item" onclick="showPanel('history')"><span class="nav-icon">✅</span> Job History</a>
+
+    <div class="nav-section-label">Growth</div>
+    <a class="nav-item" onclick="showPanel('portfolio')"><span class="nav-icon">🎨</span> Portfolio</a>
+    <a class="nav-item" onclick="showPanel('reviews')"><span class="nav-icon">⭐</span> Reviews</a>
+
+    <div class="nav-section-label">Finance</div>
+    <a class="nav-item" onclick="showPanel('wallet')"><span class="nav-icon">💰</span> Earnings & Wallet</a>
+    <a class="nav-item" onclick="showPanel('verification')"><span class="nav-icon">✅</span> Verification</a>
+
+    <div class="nav-section-label">Account</div>
+    <a class="nav-item" onclick="showPanel('notifications')"><span class="nav-icon">🔔</span> Notifications <span class="nav-badge" id="badgeNotifs">0</span></a>
+    <a class="nav-item" onclick="showPanel('profile')"><span class="nav-icon">👤</span> My Profile</a>
+    <a class="nav-item" onclick="toggleTheme()"><span class="nav-icon">🌙</span> <span id="themeLabel">Dark Mode</span></a>
+    <a class="nav-item" onclick="handleLogout()" style="color:rgba(239,68,68,0.7);"><span class="nav-icon">🚪</span> Logout</a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="sidebarAvatar">F</div>
+      <div>
+        <div class="sidebar-user-name" id="sidebarName">Loading...</div>
+        <div class="sidebar-user-role">Freelancer</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="page-title" id="pageTitle">Overview</div>
+    <div class="topbar-right">
+      <div class="topbar-btn" onclick="showPanel('notifications')">🔔<div class="notif-dot" id="notifDot" style="display:none;"></div></div>
+      <div class="topbar-btn" onclick="toggleTheme()">🌙</div>
+      <a href="/" class="topbar-btn">🏠</a>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- OVERVIEW -->
+    <div class="content-panel active" id="panel-overview">
+      <div class="verif-banner pending" id="verifBanner">
+        <div style="font-size:1.8rem;">⏳</div>
+        <div><div style="font-weight:700;color:var(--warning);">Verification Pending</div><div style="font-size:0.8rem;color:var(--text-muted);">Pay ₦1,000 to get verified and start receiving jobs on Minon Agency.</div></div>
+        <button class="action-btn btn-primary-sm" style="margin-left:auto;flex-shrink:0;" onclick="showPanel('verification')">Verify Now</button>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card" style="--c:var(--indigo);">
+          <div class="stat-icon">💼</div>
+          <div class="stat-label">Active Services</div>
+          <div class="stat-value" id="statServices">—</div>
+        </div>
+        <div class="stat-card" style="--c:var(--orange);">
+          <div class="stat-icon">📋</div>
+          <div class="stat-label">Open Requests</div>
+          <div class="stat-value" id="statRequests">—</div>
+        </div>
+        <div class="stat-card" style="--c:var(--success);">
+          <div class="stat-icon">✅</div>
+          <div class="stat-label">Jobs Completed</div>
+          <div class="stat-value" id="statCompleted">—</div>
+        </div>
+        <div class="stat-card" style="--c:var(--teal);">
+          <div class="stat-icon">💰</div>
+          <div class="stat-label">Total Earned</div>
+          <div class="stat-value" id="statEarned">—</div>
+        </div>
+      </div>
+
+      <div class="grid-60-40">
+        <!-- Recent Jobs -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Recent Job Requests</div>
+            <span class="card-action" onclick="showPanel('job-requests')">View All →</span>
+          </div>
+          <div id="recentJobs"><div class="empty-state"><div class="empty-state-icon">💼</div><p>No jobs yet. Add your services to get started!</p></div></div>
+        </div>
+
+        <!-- Wallet + Quick Actions -->
+        <div>
+          <div class="wallet-card">
+            <div style="position:relative;z-index:1;">
+              <div class="wallet-label">Available Balance</div>
+              <div class="wallet-balance" id="walletBalance">₦0</div>
+              <div style="font-size:0.78rem;color:rgba(255,255,255,0.45);margin-top:2px;" id="walletSub">Total earned: ₦0</div>
+              <div style="display:flex;gap:8px;margin-top:14px;">
+                <button class="action-btn btn-primary-sm" onclick="showPanel('wallet')">Withdraw</button>
+                <button style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);padding:7px 14px;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;" onclick="showPanel('wallet')">History</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title" style="margin-bottom:12px;">⚡ Quick Actions</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <button onclick="showPanel('add-service')" style="background:rgba(99,102,241,0.08);border:1.5px solid rgba(99,102,241,0.2);border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left;width:100%;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--indigo)'" onmouseout="this.style.borderColor='rgba(99,102,241,0.2)'">
+                <span style="font-size:1.4rem;">➕</span><div><div style="font-weight:700;font-size:0.85rem;color:var(--text-primary);">Add a Service</div><div style="font-size:0.72rem;color:var(--text-muted);">List what you offer</div></div>
+              </button>
+              <button onclick="showPanel('portfolio')" style="background:rgba(46,196,182,0.08);border:1.5px solid rgba(46,196,182,0.2);border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left;width:100%;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='rgba(46,196,182,0.2)'">
+                <span style="font-size:1.4rem;">🎨</span><div><div style="font-weight:700;font-size:0.85rem;color:var(--text-primary);">Update Portfolio</div><div style="font-size:0.72rem;color:var(--text-muted);">Showcase your work</div></div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MY SERVICES -->
+    <div class="content-panel" id="panel-services">
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header">
+          <div class="card-title">My Services</div>
+          <div style="display:flex;gap:8px;">
+            <select class="form-input" style="width:auto;padding:6px 12px;font-size:0.8rem;" id="serviceCatFilter" onchange="loadServices()">
+              <option value="">All Categories</option>
+              <option>Graphic Design</option><option>Web Development</option>
+              <option>Video Editing</option><option>Content Writing</option>
+              <option>Social Media</option><option>Digital Marketing</option>
+              <option>Photography</option><option>Other</option>
+            </select>
+            <button class="action-btn btn-primary-sm" onclick="showPanel('add-service')">+ Add Service</button>
+          </div>
+        </div>
+        <div class="services-grid" id="servicesGrid">
+          <div style="grid-column:1/-1;" class="empty-state"><div class="empty-state-icon">💼</div><p>No services yet. Add your first service!</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD SERVICE -->
+    <div class="content-panel" id="panel-add-service">
+      <div class="grid-60-40">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title" id="serviceFormTitle">Add a Service</div>
+            <button class="action-btn btn-ghost-sm" onclick="resetServiceForm()">Clear</button>
+          </div>
+          <div class="form-group"><label class="form-label">Service Title *</label><input class="form-input" id="sTitle" placeholder="e.g. Professional Logo Design for Your Brand"></div>
+          <div class="form-row-2">
+            <div class="form-group"><label class="form-label">Category *</label>
+              <select class="form-input" id="sCategory">
+                <option>Graphic Design</option><option>Web Development</option>
+                <option>Mobile App Development</option><option>Video Editing</option>
+                <option>Content Writing</option><option>Copywriting</option>
+                <option>Social Media Management</option><option>Digital Marketing</option>
+                <option>SEO</option><option>Photography</option>
+                <option>Animation</option><option>Data Entry</option>
+                <option>Virtual Assistant</option><option>Other</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Pricing Type</label>
+              <select class="form-input" id="sPricingType" onchange="togglePricingType()">
+                <option value="fixed">Fixed Price</option>
+                <option value="quote">Quote-based</option>
+                <option value="hourly">Per Hour</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group" id="priceField"><label class="form-label">Price (₦) *</label><input class="form-input" id="sPrice" type="number" placeholder="e.g. 15000"></div>
+          <div class="form-group"><label class="form-label">Delivery Time</label>
+            <select class="form-input" id="sDelivery">
+              <option>1 day</option><option>2–3 days</option><option>1 week</option>
+              <option>2 weeks</option><option>1 month</option><option>Discuss with client</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Service Description *</label><textarea class="form-input" id="sDesc" rows="5" placeholder="Describe exactly what you offer, what's included, your process, and what the client will receive..."></textarea></div>
+          <div class="form-group"><label class="form-label">Skills / Tools Used</label><input class="form-input" id="sSkills" placeholder="e.g. Photoshop, Figma, Illustrator, React..."></div>
+          <div class="form-group"><label class="form-label">Service Thumbnail (optional)</label><input class="form-input" id="sThumb" type="file" accept="image/*"></div>
+          <div style="display:flex;gap:10px;margin-top:8px;">
+            <button class="action-btn btn-ghost-sm" style="flex:1;padding:12px;" onclick="showPanel('services')">Cancel</button>
+            <button class="action-btn btn-primary-sm" style="flex:2;padding:12px;" onclick="saveService()">Publish Service</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-title" style="margin-bottom:12px;">💡 Service Tips</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;gap:8px;font-size:0.82rem;color:var(--text-secondary);"><span>✅</span><span>Be specific — tell clients exactly what they'll receive</span></div>
+              <div style="display:flex;gap:8px;font-size:0.82rem;color:var(--text-secondary);"><span>✅</span><span>Add portfolio samples to build trust</span></div>
+              <div style="display:flex;gap:8px;font-size:0.82rem;color:var(--text-secondary);"><span>✅</span><span>Competitive pricing gets more requests</span></div>
+              <div style="display:flex;gap:8px;font-size:0.82rem;color:var(--text-secondary);"><span>✅</span><span>Mention your tools and experience level</span></div>
+              <div style="display:flex;gap:8px;font-size:0.82rem;color:var(--text-secondary);"><span>🔥</span><span>Offer revisions to attract clients</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:12px;">📊 Popular Categories</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              ${['🎨 Graphic Design','💻 Web Dev','🎬 Video Editing','✍️ Writing','📱 Social Media','📈 Digital Marketing'].map(c=>`<span style="background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);color:var(--indigo);padding:4px 12px;border-radius:20px;font-size:0.78rem;font-weight:600;">${c}</span>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JOB REQUESTS -->
+    <div class="content-panel" id="panel-job-requests">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Job Requests</div></div>
+        <div id="jobRequestsList"><div class="empty-state"><div class="empty-state-icon">📋</div><p>No job requests yet</p></div></div>
+      </div>
+    </div>
+
+    <!-- ACTIVE JOBS -->
+    <div class="content-panel" id="panel-active-jobs">
+      <div id="activeJobsList"><div class="empty-state"><div class="empty-state-icon">🔥</div><p>No active jobs. Accept requests to start working!</p></div></div>
+    </div>
+
+    <!-- JOB HISTORY -->
+    <div class="content-panel" id="panel-history">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Job History</div>
+          <select class="form-input" style="width:auto;padding:6px 12px;font-size:0.8rem;" id="historyFilter" onchange="loadHistory()">
+            <option value="">All Time</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Service</th><th>Client</th><th>Amount</th><th>Payout</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody id="historyTable"><tr><td colspan="6" style="text-align:center;color:var(--text-muted);">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PORTFOLIO -->
+    <div class="content-panel" id="panel-portfolio">
+      <div class="grid-60-40">
+        <div class="card">
+          <div class="card-header"><div class="card-title">My Portfolio</div><button class="action-btn btn-primary-sm" onclick="document.getElementById('portfolioInput').click()">+ Add Work</button></div>
+          <input type="file" id="portfolioInput" accept="image/*" multiple style="display:none;" onchange="uploadPortfolio(this)">
+          <div class="portfolio-grid" id="portfolioGrid">
+            <div style="grid-column:1/-1;" class="empty-state"><div class="empty-state-icon">🎨</div><p>No portfolio items. Upload your best work!</p></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px;">Why Portfolio Matters</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem;">
+            <div style="display:flex;gap:8px;font-size:0.82rem;color:var(--text-secondary);"><span>📈</span><span>Freelancers with portfolios get 3x more job requests</span></div>
+            <div style="display:flex;gap:8px;font-size:0.82rem;color:var(--text-secondary);"><span>🎯</span><span>Clients want to see real examples of your work</span></div>
+            <div style="display:flex;gap:8px;font-size:0.82rem;color:var(--text-secondary);"><span>💰</span><span>A strong portfolio lets you charge higher rates</span></div>
+          </div>
+          <div class="card-title" style="margin-bottom:10px;">Skills & Bio</div>
+          <div class="form-group"><label class="form-label">Professional Headline</label><input class="form-input" id="pfHeadline" placeholder="e.g. Expert Graphic Designer | 5 Years Experience"></div>
+          <div class="form-group"><label class="form-label">Bio / About Me</label><textarea class="form-input" id="pfBio" rows="4" placeholder="Tell clients about yourself, your expertise and what makes you stand out..."></textarea></div>
+          <div class="form-group"><label class="form-label">Core Skills</label><input class="form-input" id="pfSkills" placeholder="Photoshop, Figma, React, WordPress..."></div>
+          <button class="action-btn btn-indigo-sm" style="width:100%;padding:11px;" onclick="savePortfolioInfo()">Save Profile Info</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVIEWS -->
+    <div class="content-panel" id="panel-reviews">
+      <div class="grid-60-40">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Client Reviews</div><div style="font-size:0.85rem;color:var(--text-muted);">Avg: <span id="avgRating" style="color:var(--warning);font-weight:700;">—</span> ⭐</div></div>
+          <div id="reviewsList"><div class="empty-state"><div class="empty-state-icon">⭐</div><p>No reviews yet</p></div></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px;">Rating Breakdown</div>
+          <div id="ratingBreakdown"><div class="empty-state" style="padding:1.5rem;"><p>No data</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WALLET -->
+    <div class="content-panel" id="panel-wallet">
+      <div class="grid-60-40">
+        <div>
+          <div class="wallet-card" style="margin-bottom:20px;">
+            <div style="position:relative;z-index:1;">
+              <div class="wallet-label">Available Balance</div>
+              <div class="wallet-balance" id="walletBalanceFull">₦0</div>
+              <div style="font-size:0.78rem;color:rgba(255,255,255,0.45);margin-top:2px;" id="walletEarned">Total earned: ₦0</div>
+              <div style="font-size:0.75rem;color:rgba(255,255,255,0.35);margin-top:2px;">2% commission deducted per job</div>
+              <div style="margin-top:14px;"><button class="action-btn btn-primary-sm" onclick="openWithdrawModal()">Request Withdrawal</button></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Transaction History</div></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Description</th><th>Type</th><th>Amount</th><th>Date</th></tr></thead>
+                <tbody id="txTable"><tr><td colspan="4" style="text-align:center;color:var(--text-muted);">Loading...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px;">Earnings Info</div>
+          <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:14px;line-height:1.6;">Minon Solutions takes a <strong style="color:var(--orange);">2% commission</strong> per completed job.</p>
+          <div style="background:var(--bg);border-radius:12px;padding:14px;margin-bottom:12px;">
+            <div style="font-size:0.72rem;color:var(--text-muted);font-weight:700;text-transform:uppercase;margin-bottom:10px;">Example</div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:0.85rem;"><span>Job price</span><span style="font-weight:700;">₦50,000</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:0.85rem;"><span>2% commission</span><span style="color:var(--error);font-weight:700;">-₦1,000</span></div>
+            <div style="border-top:1px solid var(--border);padding-top:8px;display:flex;justify-content:space-between;"><span style="font-weight:700;">Your payout</span><span style="color:var(--success);font-weight:700;">₦49,000</span></div>
+          </div>
+          <div style="background:var(--bg);border-radius:12px;padding:14px;">
+            <div style="font-size:0.72rem;color:var(--text-muted);font-weight:700;text-transform:uppercase;margin-bottom:8px;">Withdrawal Rules</div>
+            <div style="font-size:0.82rem;color:var(--text-secondary);display:flex;flex-direction:column;gap:6px;">
+              <span>✅ Minimum: <strong>₦5,000</strong></span>
+              <span>✅ Paid to your bank manually</span>
+              <span>✅ Within 24-48 hours</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VERIFICATION -->
+    <div class="content-panel" id="panel-verification">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Verification Status</div></div>
+          <div id="verifStatusCard"><div class="empty-state"><div class="empty-state-icon">⏳</div><p>Loading...</p></div></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:16px;">Submit Verification</div>
+          <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">Pay ₦1,000 verification fee to get verified and start receiving jobs through Minon Agency.</p>
+          <div style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.2);border-radius:12px;padding:14px;margin-bottom:16px;text-align:center;">
+            <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Pay Fee to</div>
+            <div style="font-family:'Clash Display',sans-serif;font-size:1.4rem;font-weight:700;color:var(--indigo);">6383313367</div>
+            <div style="font-size:0.8rem;color:var(--text-secondary);">Minon Solutions · Moniepoint MFB · ₦1,000</div>
+          </div>
+          <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="verifName" placeholder="Legal full name"></div>
+          <div class="form-group"><label class="form-label">NIN Number</label><input class="form-input" id="verifNin" placeholder="National ID Number"></div>
+          <div class="form-group"><label class="form-label">Primary Skill</label><input class="form-input" id="verifSkill" placeholder="e.g. Graphic Designer, Web Developer"></div>
+          <div class="form-group"><label class="form-label">ID Document</label><input class="form-input" id="verifId" type="file" accept="image/*"></div>
+          <div class="form-group"><label class="form-label">Payment Receipt</label><input class="form-input" id="verifReceipt" type="file" accept="image/*"></div>
+          <button class="action-btn btn-primary-sm" style="width:100%;padding:12px;" onclick="submitVerification()">Submit for Verification</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="content-panel" id="panel-notifications">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Notifications</div><button class="action-btn btn-ghost-sm" onclick="markAllRead()">Mark all read</button></div>
+        <div id="notifList"><div class="empty-state"><div class="empty-state-icon">🔔</div><p>No notifications</p></div></div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="content-panel" id="panel-profile">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Personal Info</div></div>
+          <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="editName" placeholder="Your full name"></div>
+          <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="editEmail" disabled style="opacity:0.6;"></div>
+          <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="editPhone" placeholder="08xxxxxxxxx"></div>
+          <div class="form-group"><label class="form-label">State</label><input class="form-input" id="editState" placeholder="e.g. Anambra"></div>
+          <div class="form-group"><label class="form-label">Profile Photo</label><input class="form-input" id="editAvatar" type="file" accept="image/*"></div>
+          <button class="action-btn btn-primary-sm" style="width:100%;padding:12px;" onclick="saveProfile()">Save Changes</button>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Change Password</div></div>
+          <div class="form-group"><label class="form-label">New Password</label><input class="form-input" id="newPw" type="password"></div>
+          <div class="form-group"><label class="form-label">Confirm Password</label><input class="form-input" id="confirmPw" type="password"></div>
+          <button class="action-btn btn-teal-sm" style="width:100%;padding:11px;" onclick="changePassword()">Update Password</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- WITHDRAW MODAL -->
+<div class="modal-overlay" id="withdrawModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Request Withdrawal</div><button class="modal-close" onclick="closeModal('withdrawModal')">✕</button></div>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.2rem;">Minimum ₦5,000. Processed within 24-48 hours.</p>
+    <div class="form-group"><label class="form-label">Amount (₦)</label><input class="form-input" id="wdAmount" type="number" placeholder="Min ₦5,000" min="5000"></div>
+    <div class="form-group"><label class="form-label">Account Name</label><input class="form-input" id="wdName" placeholder="Full bank account name"></div>
+    <div class="form-group"><label class="form-label">Account Number</label><input class="form-input" id="wdAcct" placeholder="10-digit number" maxlength="10"></div>
+    <div class="form-group"><label class="form-label">Bank Name</label><input class="form-input" id="wdBank" placeholder="e.g. GTBank"></div>
+    <button class="action-btn btn-primary-sm" style="width:100%;padding:12px;margin-top:8px;" onclick="submitWithdrawal()">Submit Request</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toastIcon">✅</span><span id="toastMsg">Done!</span></div>
+
+<script>
+const SUPABASE_URL='https://rmwvrbpkxbxmbpidzbfe.supabase.co';
+const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtd3ZyYnBreGJ4bWJwaWR6YmZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MTE2ODIsImV4cCI6MjA5MjM4NzY4Mn0.aIbszMyL8lAMsF2T4-oSjHbuGr1b5-Az3fI4lGd0aYM';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+let currentUser=null;let vendorProfile=null;let editingServiceId=null;
+
+async function init(){
+  const{data:{session}}=await sb.auth.getSession();
+  if(!session){window.location.href='/login';return;}
+  const{data:profile}=await sb.from('profiles').select('*').eq('id',session.user.id).single();
+  if(!profile||profile.role!=='freelancer'){window.location.href='/login';return;}
+  currentUser=profile;
+  const{data:vp}=await sb.from('vendor_profiles').select('*').eq('user_id',profile.id).single();
+  vendorProfile=vp;
+  updateUI();
+  loadOverviewStats();
+  loadRecentJobs();
+  loadWalletBalance();
+  loadBadges();
+  loadVerifStatus();
+  subscribeRealtime();
+}
+
+function updateUI(){
+  setText('sidebarName',currentUser.full_name?.split(' ')[0]||'Freelancer');
+  document.getElementById('sidebarAvatar').textContent=(currentUser.full_name||'F')[0].toUpperCase();
+  document.getElementById('editName').value=currentUser.full_name||'';
+  document.getElementById('editEmail').value=currentUser.email||'';
+  document.getElementById('editPhone').value=currentUser.phone||'';
+  document.getElementById('editState').value=currentUser.state||'';
+  updateVerifBanner();
+}
+
+function updateVerifBanner(){
+  const banner=document.getElementById('verifBanner');
+  const status=vendorProfile?.verification_status||'pending';
+  if(status==='verified'){banner.className='verif-banner verified';banner.innerHTML='<div style="font-size:1.8rem;">✅</div><div><div style="font-weight:700;color:var(--success);">Verified Freelancer</div><div style="font-size:0.8rem;color:var(--text-muted);">You are live. Add services to start receiving jobs!</div></div>';}
+  else if(status==='rejected'){banner.innerHTML='<div style="font-size:1.8rem;">❌</div><div><div style="font-weight:700;color:var(--error);">Rejected</div><div style="font-size:0.8rem;color:var(--text-muted);">Resubmit with correct documents.</div></div><button class="action-btn btn-primary-sm" style="margin-left:auto;" onclick="showPanel(\'verification\')">Resubmit</button>';}
+}
+
+async function loadOverviewStats(){
+  const uid=currentUser.id;
+  const[services,requests,completed,wallet]=await Promise.all([
+    sb.from('service_listings').select('id',{count:'exact',head:true}).eq('provider_id',uid).eq('is_available',true),
+    sb.from('orders').select('id',{count:'exact',head:true}).eq('seller_id',uid).eq('status','pending'),
+    sb.from('orders').select('id,seller_payout',{count:'exact'}).eq('seller_id',uid).eq('status','delivered'),
+    sb.from('wallets').select('balance,total_earned').eq('user_id',uid).single()
+  ]);
+  setText('statServices',services.count||0);
+  setText('statRequests',requests.count||0);
+  setText('statCompleted',completed.count||0);
+  const earned=completed.data?.reduce((s,o)=>s+(o.seller_payout||0),0)||0;
+  setText('statEarned','₦'+fmt(earned));
+  if(wallet.data){setText('walletBalance','₦'+fmt(wallet.data.balance));setText('walletSub','Total earned: ₦'+fmt(wallet.data.total_earned||0));}
+}
+
+async function loadBadges(){
+  const uid=currentUser.id;
+  const[svc,req,active,notifs]=await Promise.all([
+    sb.from('service_listings').select('id',{count:'exact',head:true}).eq('provider_id',uid).eq('is_available',true),
+    sb.from('orders').select('id',{count:'exact',head:true}).eq('seller_id',uid).eq('status','pending'),
+    sb.from('orders').select('id',{count:'exact',head:true}).eq('seller_id',uid).eq('status','confirmed'),
+    sb.from('notifications').select('id',{count:'exact',head:true}).eq('user_id',uid).eq('is_read',false)
+  ]);
+  setText('badgeServices',svc.count||0);
+  setText('badgeJobs',req.count||0);
+  setText('badgeActive',active.count||0);
+  setText('badgeNotifs',notifs.count||0);
+  if((notifs.count||0)>0)document.getElementById('notifDot').style.display='block';
+  else document.getElementById('notifDot').style.display='none';
+}
+
+async function loadRecentJobs(){
+  const{data}=await sb.from('orders').select('*').eq('seller_id',currentUser.id).order('created_at',{ascending:false}).limit(4);
+  const el=document.getElementById('recentJobs');
+  if(!data?.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">💼</div><p>No jobs yet</p></div>';return;}
+  el.innerHTML=data.map(o=>`<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <div style="font-weight:700;font-size:0.85rem;">${o.item_title||'Job Request'}</div>
+      <span class="badge ${o.status==='delivered'?'badge-success':o.status==='confirmed'?'badge-teal':o.status==='pending'?'badge-warning':'badge-muted'}">${o.status}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);">
+      <span>₦${fmt(o.total_amount)}</span><span>${fmtDate(o.created_at)}</span>
+    </div>
+  </div>`).join('');
+}
+
+// SERVICES
+async function loadServices(){
+  const cat=document.getElementById('serviceCatFilter')?.value;
+  let q=sb.from('service_listings').select('*').eq('provider_id',currentUser.id).order('created_at',{ascending:false});
+  if(cat)q=q.eq('category',cat);
+  const{data}=await q;
+  const grid=document.getElementById('servicesGrid');
+  if(!data?.length){grid.innerHTML='<div style="grid-column:1/-1;" class="empty-state"><div class="empty-state-icon">💼</div><p>No services yet. Add your first service!</p></div>';return;}
+  const catIcons={Design:'🎨','Graphic Design':'🎨','Web Development':'💻','Video Editing':'🎬','Content Writing':'✍️','Social Media':'📱','Digital Marketing':'📈',Photography:'📸',Other:'📦'};
+  grid.innerHTML=data.map(s=>`<div class="service-card">
+    <div class="service-thumb">${catIcons[s.category]||'💼'}</div>
+    <div class="service-body">
+      <div class="service-title">${s.title}</div>
+      <div class="service-category">${s.category}</div>
+      <div class="service-price">${s.pricing_type==='quote'?'Quote-based':s.pricing_type==='hourly'?'₦'+fmt(s.base_price)+'/hr':'₦'+fmt(s.base_price)}</div>
+      <div class="service-meta">
+        <span class="badge ${s.is_available?'badge-success':'badge-error'}">${s.is_available?'Live':'Hidden'}</span>
+        <span style="font-size:0.72rem;color:var(--text-muted);">⏱️ ${s.delivery_time||'TBD'}</span>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px;">
+        <button class="action-btn btn-ghost-sm" onclick="editService('${s.id}')">Edit</button>
+        <button class="action-btn ${s.is_available?'btn-ghost-sm':'btn-success-sm'}" onclick="toggleService('${s.id}',${!s.is_available})">${s.is_available?'Hide':'Show'}</button>
+        <button class="action-btn btn-danger-sm" onclick="deleteService('${s.id}')">Delete</button>
+      </div>
+    </div>
+  </div>`).join('');
+}
+
+function togglePricingType(){
+  const type=document.getElementById('sPricingType').value;
+  document.getElementById('priceField').style.display=type==='quote'?'none':'block';
+}
+
+async function saveService(){
+  const title=document.getElementById('sTitle').value.trim();
+  const desc=document.getElementById('sDesc').value.trim();
+  const pricingType=document.getElementById('sPricingType').value;
+  const price=parseFloat(document.getElementById('sPrice').value)||null;
+  if(!title||!desc){toast('⚠️','Fill in title and description','warning');return;}
+  if(pricingType!=='quote'&&!price){toast('⚠️','Enter a price','warning');return;}
+
+  let thumbUrl=null;
+  const thumbFile=document.getElementById('sThumb').files[0];
+  if(thumbFile){
+    const path=`services/${currentUser.id}/${Date.now()}.${thumbFile.name.split('.').pop()}`;
+    await sb.storage.from('services').upload(path,thumbFile);
+    const{data:url}=sb.storage.from('services').getPublicUrl(path);
+    thumbUrl=url?.publicUrl;
+  }
+
+  const payload={
+    provider_id:currentUser.id,title,description:desc,
+    category:document.getElementById('sCategory').value,
+    pricing_type:pricingType,base_price:price,
+    delivery_time:document.getElementById('sDelivery').value,
+    skills:document.getElementById('sSkills').value||null,
+    thumbnail_url:thumbUrl,is_available:true
+  };
+
+  if(editingServiceId){
+    await sb.from('service_listings').update(payload).eq('id',editingServiceId);
+    toast('✅','Service updated!','success');editingServiceId=null;
+  } else {
+    await sb.from('service_listings').insert(payload);
+    toast('✅','Service published!','success');
+  }
+  resetServiceForm();showPanel('services');
+}
+
+function resetServiceForm(){
+  ['sTitle','sDesc','sSkills'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('sPrice').value='';
+  document.getElementById('serviceFormTitle').textContent='Add a Service';
+  editingServiceId=null;
+}
+
+async function editService(id){
+  const{data:s}=await sb.from('service_listings').select('*').eq('id',id).single();
+  if(!s)return;
+  editingServiceId=id;
+  document.getElementById('sTitle').value=s.title||'';
+  document.getElementById('sDesc').value=s.description||'';
+  document.getElementById('sSkills').value=s.skills||'';
+  document.getElementById('sPrice').value=s.base_price||'';
+  document.getElementById('serviceFormTitle').textContent='Edit Service';
+  showPanel('add-service');
+}
+
+async function toggleService(id,visible){
+  await sb.from('service_listings').update({is_available:visible}).eq('id',id);
+  toast(visible?'✅':'👁️',visible?'Service is now live!':'Service hidden','success');loadServices();loadBadges();
+}
+
+async function deleteService(id){
+  if(!confirm('Delete this service?'))return;
+  await sb.from('service_listings').delete().eq('id',id);
+  toast('🗑️','Service deleted','success');loadServices();loadBadges();
+}
+
+// JOB REQUESTS
+async function loadJobRequests(){
+  const{data}=await sb.from('orders').select('*').eq('seller_id',currentUser.id).eq('status','pending').order('created_at',{ascending:false});
+  const el=document.getElementById('jobRequestsList');
+  if(!data?.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">📋</div><p>No job requests yet</p></div>';return;}
+  el.innerHTML=data.map(o=>`<div class="job-card new">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+      <div><div style="font-family:monospace;font-size:0.72rem;color:var(--text-muted);">#${o.id?.slice(0,10)}</div><div style="font-weight:700;font-size:0.92rem;">${o.item_title||'Job Request'}</div></div>
+      <div style="text-align:right;"><div style="font-family:'Clash Display',sans-serif;font-size:1.2rem;font-weight:700;color:var(--orange);">₦${fmt(o.total_amount)}</div><div style="font-size:0.7rem;color:var(--text-muted);">${fmtDate(o.created_at)}</div></div>
+    </div>
+    ${o.delivery_notes?`<div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:10px;">📋 ${o.delivery_notes}</div>`:''}
+    <div style="display:flex;gap:8px;">
+      <button class="action-btn btn-success-sm" style="flex:1;padding:10px;" onclick="acceptJob('${o.id}')">✅ Accept Job</button>
+      <button class="action-btn btn-danger-sm" onclick="rejectJob('${o.id}')">❌ Decline</button>
+    </div>
+  </div>`).join('');
+}
+
+async function loadActiveJobs(){
+  const{data}=await sb.from('orders').select('*').eq('seller_id',currentUser.id).eq('status','confirmed').order('created_at',{ascending:false});
+  const el=document.getElementById('activeJobsList');
+  if(!data?.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">🔥</div><p>No active jobs</p></div>';return;}
+  el.innerHTML=data.map(o=>`<div class="job-card" style="border-color:var(--teal);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div><div style="font-family:monospace;font-size:0.72rem;color:var(--text-muted);">#${o.id?.slice(0,10)}</div><div style="font-weight:700;font-size:0.92rem;">${o.item_title||'Job'}</div></div>
+      <span class="badge badge-teal">🔥 In Progress</span>
+    </div>
+    <div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:10px;">💰 Payout: ₦${fmt((o.total_amount||0)*0.98)} · ${fmtDate(o.created_at)}</div>
+    <div style="display:flex;gap:8px;">
+      <button class="action-btn btn-success-sm" style="flex:1;padding:10px;" onclick="completeJob('${o.id}',${o.total_amount||0})">✅ Mark as Completed</button>
+    </div>
+  </div>`).join('');
+}
+
+async function acceptJob(id){
+  await sb.from('orders').update({status:'confirmed'}).eq('id',id);
+  toast('✅','Job accepted! Get to work!','success');
+  loadJobRequests();loadActiveJobs();loadBadges();
+}
+
+async function rejectJob(id){
+  await sb.from('orders').update({status:'cancelled'}).eq('id',id);
+  toast('❌','Job declined','error');loadJobRequests();loadBadges();
+}
+
+async function completeJob(id,amount){
+  await sb.from('orders').update({status:'delivered'}).eq('id',id);
+  const payout=amount*0.98;
+  const{data:wallet}=await sb.from('wallets').select('balance,total_earned').eq('user_id',currentUser.id).single();
+  await sb.from('wallets').update({balance:(wallet?.balance||0)+payout,total_earned:(wallet?.total_earned||0)+payout}).eq('user_id',currentUser.id);
+  await sb.from('wallet_transactions').insert({user_id:currentUser.id,type:'credit',amount:payout,description:`Job completed #${id.slice(0,8)}`});
+  toast('🎉','Job completed! Earnings added to wallet.','success');
+  loadActiveJobs();loadWalletBalance();loadOverviewStats();loadBadges();
+}
+
+async function loadHistory(){
+  const filter=document.getElementById('historyFilter')?.value;
+  let q=sb.from('orders').select('*').eq('seller_id',currentUser.id).in('status',['delivered','cancelled']).order('created_at',{ascending:false});
+  if(filter==='week')q=q.gte('created_at',new Date(Date.now()-7*24*60*60*1000).toISOString());
+  else if(filter==='month')q=q.gte('created_at',new Date(new Date().getFullYear(),new Date().getMonth(),1).toISOString());
+  const{data}=await q;
+  const tbody=document.getElementById('historyTable');
+  if(!data?.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">No history</td></tr>';return;}
+  tbody.innerHTML=data.map(o=>`<tr>
+    <td style="font-weight:600;font-size:0.85rem;">${o.item_title||'Job'}</td>
+    <td style="font-size:0.78rem;">${o.buyer_id?.slice(0,10)||'—'}</td>
+    <td style="font-weight:700;">₦${fmt(o.total_amount)}</td>
+    <td style="color:var(--success);font-weight:700;">₦${fmt((o.total_amount||0)*0.98)}</td>
+    <td><span class="badge ${o.status==='delivered'?'badge-success':'badge-error'}">${o.status}</span></td>
+    <td style="font-size:0.73rem;color:var(--text-muted);">${fmtDate(o.created_at)}</td>
+  </tr>`).join('');
+}
+
+// PORTFOLIO
+async function uploadPortfolio(input){
+  const files=Array.from(input.files);
+  if(!files.length)return;
+  toast('📤','Uploading...','info');
+  for(const file of files){
+    const path=`evidence/${currentUser.id}/${Date.now()}.${file.name.split('.').pop()}`;
+    const{error}=await sb.storage.from('evidence').upload(path,file);
+    if(!error){
+      const{data:url}=sb.storage.from('evidence').getPublicUrl(path);
+      await sb.from('portfolio_items').insert({user_id:currentUser.id,image_url:url?.publicUrl,title:file.name.split('.')[0]});
+    }
+  }
+  toast('✅','Portfolio updated!','success');
+  loadPortfolio();
+}
+
+async function loadPortfolio(){
+  const{data}=await sb.from('portfolio_items').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+  const grid=document.getElementById('portfolioGrid');
+  if(!data?.length){grid.innerHTML='<div style="grid-column:1/-1;" class="empty-state"><div class="empty-state-icon">🎨</div><p>No portfolio items yet</p></div>';return;}
+  grid.innerHTML=data.map(p=>`<div class="portfolio-item">
+    <div class="portfolio-thumb">${p.image_url?`<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;">`:'🎨'}</div>
+    <div class="portfolio-info"><div class="portfolio-title">${p.title||'Portfolio Item'}</div><div class="portfolio-type">${p.category||'Work Sample'}</div></div>
+  </div>`).join('');
+}
+
+async function savePortfolioInfo(){
+  const updates={bio:document.getElementById('pfBio').value.trim(),updated_at:new Date().toISOString()};
+  await sb.from('profiles').update(updates).eq('id',currentUser.id);
+  toast('✅','Profile info saved!','success');
+}
+
+// REVIEWS
+async function loadReviews(){
+  const{data}=await sb.from('reviews').select('*,profiles!reviewer_id(full_name)').eq('reviewed_id',currentUser.id).order('created_at',{ascending:false});
+  const el=document.getElementById('reviewsList');
+  if(!data?.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">⭐</div><p>No reviews yet</p></div>';return;}
+  const avg=(data.reduce((s,r)=>s+r.rating,0)/data.length).toFixed(1);
+  setText('avgRating',avg);
+  document.getElementById('ratingBreakdown').innerHTML=[5,4,3,2,1].map(star=>{
+    const count=data.filter(r=>r.rating===star).length;
+    const pct=Math.round((count/data.length)*100);
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><span style="font-size:0.82rem;color:var(--text-muted);width:20px;">${star}⭐</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;"><div style="width:${pct}%;height:100%;background:var(--indigo);border-radius:3px;"></div></div><span style="font-size:0.75rem;color:var(--text-muted);width:30px;">${count}</span></div>`;
+  }).join('');
+  el.innerHTML=data.map(r=>`<div class="review-card">
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><div style="font-weight:700;font-size:0.85rem;">${r.profiles?.full_name||'Client'}</div><div style="font-size:0.72rem;color:var(--text-muted);">${fmtDate(r.created_at)}</div></div>
+    <div class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+    <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:6px;">${r.comment||''}</p>
+  </div>`).join('');
+}
+
+// WALLET
+async function loadWalletBalance(){
+  const{data}=await sb.from('wallets').select('*').eq('user_id',currentUser.id).single();
+  if(!data)return;
+  setText('walletBalance','₦'+fmt(data.balance));
+  setText('walletBalanceFull','₦'+fmt(data.balance));
+  setText('walletEarned','Total earned: ₦'+fmt(data.total_earned||0));
+  const{data:txs}=await sb.from('wallet_transactions').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(20);
+  const tbody=document.getElementById('txTable');
+  if(!txs?.length){tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">No transactions</td></tr>';return;}
+  tbody.innerHTML=txs.map(t=>`<tr><td style="font-size:0.85rem;">${t.description||'—'}</td><td><span class="badge ${t.type==='credit'?'badge-success':'badge-error'}">${t.type}</span></td><td style="font-weight:700;color:${t.type==='credit'?'var(--success)':'var(--error)'};">${t.type==='credit'?'+':'-'}₦${fmt(t.amount)}</td><td style="font-size:0.75rem;color:var(--text-muted);">${fmtDate(t.created_at)}</td></tr>`).join('');
+}
+
+async function submitWithdrawal(){
+  const amount=parseFloat(document.getElementById('wdAmount').value);
+  const name=document.getElementById('wdName').value.trim();
+  const acct=document.getElementById('wdAcct').value.trim();
+  const bank=document.getElementById('wdBank').value.trim();
+  if(!amount||amount<5000){toast('⚠️','Minimum is ₦5,000','warning');return;}
+  if(!name||!acct||!bank){toast('⚠️','Fill all bank details','warning');return;}
+  const{data:wallet}=await sb.from('wallets').select('balance').eq('user_id',currentUser.id).single();
+  if(!wallet||wallet.balance<amount){toast('❌','Insufficient balance','error');return;}
+  await sb.from('withdrawal_requests').insert({user_id:currentUser.id,amount,account_name:name,account_number:acct,bank_name:bank});
+  await sb.from('wallets').update({balance:wallet.balance-amount}).eq('user_id',currentUser.id);
+  closeModal('withdrawModal');
+  toast('✅','Withdrawal requested!','success');
+  loadWalletBalance();
+}
+
+// VERIFICATION
+async function loadVerifStatus(){
+  const el=document.getElementById('verifStatusCard');
+  const status=vendorProfile?.verification_status||'not_submitted';
+  const map={pending:{icon:'⏳',color:'var(--warning)',title:'Under Review',desc:'24-48 hours.'},verified:{icon:'✅',color:'var(--success)',title:'Verified Freelancer',desc:'You are live on Minon Agency!'},rejected:{icon:'❌',color:'var(--error)',title:'Rejected',desc:'Resubmit documents.'},not_submitted:{icon:'📋',color:'var(--text-muted)',title:'Not Submitted',desc:'Submit to get verified.'}};
+  const s=map[status]||map.not_submitted;
+  el.innerHTML=`<div style="text-align:center;padding:2rem;"><div style="font-size:3rem;margin-bottom:1rem;">${s.icon}</div><div style="font-family:'Clash Display',sans-serif;font-size:1.2rem;font-weight:700;color:${s.color};margin-bottom:0.5rem;">${s.title}</div><p style="font-size:0.85rem;color:var(--text-muted);">${s.desc}</p></div>`;
+}
+
+async function submitVerification(){
+  const name=document.getElementById('verifName').value.trim();
+  const nin=document.getElementById('verifNin').value.trim();
+  const skill=document.getElementById('verifSkill').value.trim();
+  if(!name||!nin){toast('⚠️','Fill in all required fields','warning');return;}
+  let idUrl=null,receiptUrl=null;
+  const idFile=document.getElementById('verifId').files[0];
+  const recFile=document.getElementById('verifReceipt').files[0];
+  if(idFile){const p=`verification/${currentUser.id}/id.${idFile.name.split('.').pop()}`;await sb.storage.from('verification').upload(p,idFile,{upsert:true});const{data:u}=sb.storage.from('verification').getPublicUrl(p);idUrl=u?.publicUrl;}
+  if(recFile){const p=`verification/${currentUser.id}/receipt.${recFile.name.split('.').pop()}`;await sb.storage.from('verification').upload(p,recFile,{upsert:true});const{data:u}=sb.storage.from('verification').getPublicUrl(p);receiptUrl=u?.publicUrl;}
+  if(!vendorProfile){
+    await sb.from('vendor_profiles').insert({user_id:currentUser.id,business_name:name,nin,id_document_url:idUrl,verification_fee_receipt_url:receiptUrl,verification_fee_paid:!!recFile,verification_status:'pending',branch:'agency'});
+  } else {
+    await sb.from('vendor_profiles').update({nin,id_document_url:idUrl,verification_fee_receipt_url:receiptUrl,verification_fee_paid:!!recFile,verification_status:'pending'}).eq('user_id',currentUser.id);
+  }
+  toast('✅','Verification submitted!','success');loadVerifStatus();
+}
+
+// NOTIFICATIONS
+async function loadNotifications(){
+  const{data}=await sb.from('notifications').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(30);
+  const el=document.getElementById('notifList');
+  if(!data?.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">🔔</div><p>No notifications</p></div>';return;}
+  el.innerHTML=data.map(n=>`<div style="padding:12px;border-bottom:1px solid var(--border);${!n.is_read?'background:rgba(99,102,241,0.04);':''}cursor:pointer;" onclick="readNotif('${n.id}')">
+    <div style="font-weight:700;font-size:0.85rem;margin-bottom:2px;">${n.title}</div>
+    <div style="font-size:0.8rem;color:var(--text-muted);">${n.message}</div>
+    <div style="font-size:0.7rem;color:var(--text-muted);margin-top:3px;">${fmtDate(n.created_at)}</div>
+  </div>`).join('');
+}
+
+async function readNotif(id){await sb.from('notifications').update({is_read:true}).eq('id',id);loadNotifications();}
+async function markAllRead(){await sb.from('notifications').update({is_read:true}).eq('user_id',currentUser.id);loadNotifications();toast('✅','All read','success');}
+
+// PROFILE
+async function saveProfile(){
+  const updates={full_name:document.getElementById('editName').value.trim(),phone:document.getElementById('editPhone').value.trim(),state:document.getElementById('editState').value.trim(),updated_at:new Date().toISOString()};
+  const file=document.getElementById('editAvatar').files[0];
+  if(file){const path=`avatars/${currentUser.id}.${file.name.split('.').pop()}`;await sb.storage.from('avatars').upload(path,file,{upsert:true});const{data:url}=sb.storage.from('avatars').getPublicUrl(path);updates.avatar_url=url?.publicUrl;}
+  await sb.from('profiles').update(updates).eq('id',currentUser.id);
+  Object.assign(currentUser,updates);updateUI();
+  toast('✅','Profile updated!','success');
+}
+
+async function changePassword(){
+  const np=document.getElementById('newPw').value;const cp=document.getElementById('confirmPw').value;
+  if(!np||np!==cp){toast('⚠️','Passwords do not match','warning');return;}
+  const{error}=await sb.auth.updateUser({password:np});
+  if(error){toast('❌',error.message,'error');return;}
+  toast('✅','Password updated!','success');
+}
+
+function subscribeRealtime(){
+  sb.channel(`freelancer-${currentUser?.id}`)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'orders',filter:`seller_id=eq.${currentUser.id}`},()=>{loadBadges();loadRecentJobs();toast('📋','New job request!','success');})
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:`user_id=eq.${currentUser.id}`},(p)=>{loadNotifications();toast('🔔',p.new.title,'info');})
+    .subscribe();
+}
+
+function showPanel(name){
+  document.querySelectorAll('.content-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(`panel-${name}`).classList.add('active');
+  const titles={overview:'Overview',services:'My Services','add-service':'Add Service','job-requests':'Job Requests','active-jobs':'Active Jobs',history:'Job History',portfolio:'Portfolio',reviews:'Reviews',wallet:'Earnings & Wallet',verification:'Verification',notifications:'Notifications',profile:'My Profile'};
+  setText('pageTitle',titles[name]||name);
+  const loaders={services:loadServices,'job-requests':loadJobRequests,'active-jobs':loadActiveJobs,history:loadHistory,portfolio:loadPortfolio,reviews:loadReviews,wallet:loadWalletBalance,verification:loadVerifStatus,notifications:loadNotifications};
+  if(loaders[name])loaders[name]();
+}
+
+function setText(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
+function fmt(n){return Number(n||0).toLocaleString('en-NG');}
+function fmtDate(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-NG',{day:'2-digit',month:'short',year:'numeric'});}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function openWithdrawModal(){document.getElementById('withdrawModal').classList.add('open');}
+
+let toastTimer;
+function toast(icon,msg){
+  document.getElementById('toastIcon').textContent=icon;
+  document.getElementById('toastMsg').textContent=msg;
+  const t=document.getElementById('toast');t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+let isDark=localStorage.getItem('minon-theme')==='dark';
+function applyTheme(){document.documentElement.setAttribute('data-theme',isDark?'dark':'light');setText('themeLabel',isDark?'Light Mode':'Dark Mode');}
+applyTheme();
+function toggleTheme(){isDark=!isDark;localStorage.setItem('minon-theme',isDark?'dark':'light');applyTheme();}
+async function handleLogout(){await sb.auth.signOut();window.location.href='/login';}
+
+window.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>

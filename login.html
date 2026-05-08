@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+
+<script>
+// Global theme persistence - runs before body renders
+(function(){
+  var t=localStorage.getItem('minon-theme');
+  if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}
+  else{document.documentElement.setAttribute('data-theme','light');}
+})();
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — Minon Solutions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Bricolage+Grotesque:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>if(typeof window.supabase==='undefined'){var _s=document.createElement('script');_s.src='https://unpkg.com/@supabase/supabase-js@2';document.head.appendChild(_s);}</script>
+<script>
+if (typeof window.supabase === 'undefined') {
+  var s = document.createElement('script');
+  s.src = 'https://unpkg.com/@supabase/supabase-js@2';
+  document.head.appendChild(s);
+}
+</script>
+<style>
+:root {
+  --navy: #0D1B3E;
+  --teal: #2EC4B6;
+  --orange: #F4762A;
+  --bg: #F5F7FA;
+  --bg-card: #FFFFFF;
+  --text-primary: #0D1B3E;
+  --text-secondary: #4A5568;
+  --text-muted: #8896AB;
+  --border: rgba(13,27,62,0.12);
+  --shadow-lg: 0 20px 60px rgba(13,27,62,0.12);
+  --error: #EF4444;
+  --success: #10B981;
+}
+[data-theme="dark"] {
+  --bg: #070E1F;
+  --bg-card: #0F1A35;
+  --text-primary: #F0F4FF;
+  --text-secondary: #A8B8D8;
+  --text-muted: #5A7090;
+  --border: rgba(255,255,255,0.08);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,0.4);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* LEFT PANEL */
+.auth-left {
+  background: linear-gradient(135deg, var(--navy) 0%, #0a1628 100%);
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: flex-start;
+  padding: 60px;
+}
+.auth-left-orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(80px); opacity: 0.15;
+}
+.orb1 { width:400px; height:400px; background:var(--teal); top:-100px; right:-100px; }
+.orb2 { width:300px; height:300px; background:var(--orange); bottom:-80px; left:-60px; }
+.auth-left-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+.auth-logo {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 3rem; position: relative; z-index: 1;
+  text-decoration: none;
+}
+.auth-logo-icon {
+  width: 48px; height: 48px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--teal), var(--orange));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Clash Display', sans-serif;
+  font-size: 1.3rem; font-weight: 700; color: #fff;
+}
+.auth-logo-text {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 1.2rem; font-weight: 700; color: #fff;
+}
+.auth-logo-text span { color: var(--orange); }
+.auth-logo-sub { font-size: 0.65rem; color: rgba(255,255,255,0.45); letter-spacing: 1.5px; text-transform: uppercase; }
+
+.auth-left h2 {
+  font-family: 'Clash Display', sans-serif;
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 700; color: #fff;
+  line-height: 1.1; margin-bottom: 1.2rem;
+  position: relative; z-index: 1;
+}
+.auth-left h2 span { color: var(--orange); }
+.auth-left p {
+  color: rgba(255,255,255,0.55);
+  font-size: 1rem; line-height: 1.75;
+  margin-bottom: 2.5rem;
+  position: relative; z-index: 1;
+  max-width: 380px;
+}
+
+.auth-features { list-style: none; display: flex; flex-direction: column; gap: 1rem; position: relative; z-index: 1; }
+.auth-features li {
+  display: flex; align-items: center; gap: 12px;
+  color: rgba(255,255,255,0.75); font-size: 0.9rem;
+}
+.auth-feature-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; flex-shrink: 0;
+}
+
+/* RIGHT PANEL */
+.auth-right {
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  padding: 60px 40px;
+  position: relative;
+}
+
+.theme-toggle {
+  position: absolute; top: 24px; right: 24px;
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  cursor: pointer; font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.theme-toggle:hover { border-color: var(--teal); }
+
+.auth-form-wrap {
+  width: 100%; max-width: 420px;
+}
+
+.auth-form-title {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 2rem; font-weight: 700;
+  color: var(--text-primary); margin-bottom: 0.5rem;
+}
+.auth-form-sub {
+  color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem;
+}
+.auth-form-sub a { color: var(--teal); text-decoration: none; font-weight: 600; }
+
+/* Google button */
+.google-btn {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 13px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 0.92rem; font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  margin-bottom: 1.5rem;
+}
+.google-btn:hover { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(46,196,182,0.1); }
+.google-icon { font-size: 1.1rem; }
+
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 1.5rem;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.divider span { color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; }
+
+/* Form fields */
+.form-group { margin-bottom: 1.2rem; }
+.form-label {
+  display: block; font-size: 0.85rem; font-weight: 600;
+  color: var(--text-secondary); margin-bottom: 6px;
+}
+.form-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 13px 16px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 0.92rem; color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(46,196,182,0.1); }
+.form-input.error { border-color: var(--error); }
+.form-input::placeholder { color: var(--text-muted); }
+
+.input-wrap { position: relative; }
+.input-wrap .form-input { padding-right: 44px; }
+.toggle-pw {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  cursor: pointer; color: var(--text-muted); font-size: 1rem;
+  background: none; border: none; padding: 0;
+}
+
+.form-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.remember { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer; }
+.remember input { accent-color: var(--teal); }
+.forgot { color: var(--teal); text-decoration: none; font-size: 0.85rem; font-weight: 600; }
+.forgot:hover { text-decoration: underline; }
+
+.submit-btn {
+  width: 100%;
+  background: var(--navy);
+  color: #fff;
+  border: none; border-radius: 12px;
+  padding: 14px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1rem; font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(13,27,62,0.25);
+}
+.submit-btn:hover { background: #162347; transform: translateY(-1px); box-shadow: 0 8px 28px rgba(13,27,62,0.3); }
+.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.spinner {
+  width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff; border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: none;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Alert */
+.alert {
+  border-radius: 10px; padding: 12px 16px;
+  font-size: 0.85rem; margin-bottom: 1.2rem;
+  display: none; align-items: center; gap: 8px;
+}
+.alert.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: var(--error); display: flex; }
+.alert.success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: var(--success); display: flex; }
+
+.auth-switch {
+  text-align: center; margin-top: 1.5rem;
+  font-size: 0.88rem; color: var(--text-muted);
+}
+.auth-switch a { color: var(--teal); text-decoration: none; font-weight: 600; }
+
+@media (max-width: 768px) {
+  body { grid-template-columns: 1fr; }
+  .auth-left { display: none; }
+  .auth-right { padding: 40px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- LEFT PANEL -->
+<div class="auth-left">
+  <div class="auth-left-orb orb1"></div>
+  <div class="auth-left-orb orb2"></div>
+  <div class="auth-left-grid"></div>
+
+  <a href="/" class="auth-logo">
+    <img src="/logo.png" alt="Minon Solutions" style="height:52px;width:auto;object-fit:contain;">
+    <div>
+      <div class="auth-logo-text">Min<span>o</span>n Solutions</div>
+      <div class="auth-logo-sub">RC: 8965878</div>
+    </div>
+  </a>
+
+  <h2>Welcome<br>Back to <span>Minon</span></h2>
+  <p>Your Central Hub for Everything is waiting. Log in to access your dashboard, orders, wallet and more.</p>
+
+  <ul class="auth-features">
+    <li><div class="auth-feature-icon">🛒</div> Browse & order from all 6 branches</li>
+    <li><div class="auth-feature-icon">💰</div> Manage your wallet & earnings</li>
+    <li><div class="auth-feature-icon">📦</div> Track all your orders in real time</li>
+    <li><div class="auth-feature-icon">🤖</div> Chat with Minon AI 24/7</li>
+    <li><div class="auth-feature-icon">🎁</div> Earn ₦300 for every successful referral</li>
+  </ul>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="auth-right">
+  <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+
+  <div class="auth-form-wrap">
+    <div class="auth-form-title">Sign In</div>
+    <div class="auth-form-sub">New to Minon? <a href="/signup">Create a free account</a></div>
+
+    <div class="alert" id="alertBox"></div>
+
+    <button class="google-btn" onclick="loginWithGoogle()">
+      <span class="google-icon">G</span>
+      Continue with Google
+    </button>
+
+    <div class="divider"><span>or sign in with email or phone</span></div>
+
+    <div class="form-group">
+      <label class="form-label">Email or Phone Number</label>
+      <input class="form-input" id="identifier" type="text" placeholder="email@example.com or 08xxxxxxxxx" autocomplete="username">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="input-wrap">
+        <input class="form-input" id="password" type="password" placeholder="Enter your password" autocomplete="current-password">
+        <button class="toggle-pw" onclick="togglePassword('password', this)" type="button">👁️</button>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label class="remember">
+        <input type="checkbox" id="remember"> Remember me
+      </label>
+      <a href="/forgot-password" class="forgot">Forgot password?</a>
+    </div>
+
+    <button class="submit-btn" onclick="handleLogin()" id="loginBtn">
+      <div class="spinner" id="loginSpinner"></div>
+      <span id="loginBtnText">Sign In to Minon Solutions</span>
+    </button>
+
+    <div class="auth-switch">
+      Don't have an account? <a href="/signup">Sign up free</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://rmwvrbpkxbxmbpidzbfe.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtd3ZyYnBreGJ4bWJwaWR6YmZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MTE2ODIsImV4cCI6MjA5MjM4NzY4Mn0.aIbszMyL8lAMsF2T4-oSjHbuGr1b5-Az3fI4lGd0aYM';
+let supabase;
+try {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+} catch(e) {
+  document.getElementById('alertBox').textContent = '⚠️ Connection error. Please refresh.';
+  document.getElementById('alertBox').className = 'alert error';
+}
+
+// Theme
+let isDark = localStorage.getItem('minon-theme') === 'dark';
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+}
+applyTheme();
+function toggleTheme() { isDark = !isDark; localStorage.setItem('minon-theme', isDark ? 'dark' : 'light'); applyTheme(); }
+
+// Toggle password visibility
+function togglePassword(id, btn) {
+  const input = document.getElementById(id);
+  input.type = input.type === 'password' ? 'text' : 'password';
+  btn.textContent = input.type === 'password' ? '👁️' : '🙈';
+}
+
+// Show alert
+function showAlert(msg, type) {
+  const box = document.getElementById('alertBox');
+  box.textContent = msg;
+  box.className = `alert ${type}`;
+}
+function hideAlert() {
+  document.getElementById('alertBox').className = 'alert';
+}
+
+// Loading state
+function setLoading(loading) {
+  const btn = document.getElementById('loginBtn');
+  const spinner = document.getElementById('loginSpinner');
+  const text = document.getElementById('loginBtnText');
+  btn.disabled = loading;
+  spinner.style.display = loading ? 'block' : 'none';
+  text.textContent = loading ? 'Signing in...' : 'Sign In to Minon Solutions';
+}
+
+// Redirect based on role
+function redirectByRole(role) {
+  const routes = {
+    admin: '/admin',
+    vendor: '/vendor',
+    service_provider: '/provider',
+    dispatch_rider: '/rider',
+    tutor: '/tutor',
+    realtor: '/realtor',
+    restaurant_owner: '/restaurant',
+    freelancer: '/freelancer',
+    buyer: '/buyer'
+  };
+  window.location.href = routes[role] || '/buyer';
+}
+
+// Login handler
+async function handleLogin() {
+  hideAlert();
+  const identifier = document.getElementById('identifier').value.trim();
+  const password = document.getElementById('password').value;
+
+  if (!identifier || !password) {
+    showAlert('⚠️ Please enter your email/phone and password.', 'error');
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    // Determine if email or phone
+    const isEmail = identifier.includes('@');
+    let email = identifier;
+
+    // If phone, look up email from profiles
+    if (!isEmail) {
+      const phone = identifier.replace(/\s/g, '');
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('phone', phone)
+        .single();
+
+      if (profileError || !profile) {
+        showAlert('❌ No account found with that phone number.', 'error');
+        setLoading(false);
+        return;
+      }
+      email = profile.email;
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      showAlert('❌ ' + (error.message === 'Invalid login credentials' ? 'Wrong email or password. Please try again.' : error.message), 'error');
+      setLoading(false);
+      return;
+    }
+
+    // Get profile for role-based redirect
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, is_banned, full_name')
+      .eq('id', data.user.id)
+      .single();
+
+    if (profile?.is_banned) {
+      await supabase.auth.signOut();
+      showAlert('🚫 Your account has been suspended. Contact support.', 'error');
+      setLoading(false);
+      return;
+    }
+
+    showAlert(`✅ Welcome back, ${profile?.full_name?.split(' ')[0] || 'User'}! Redirecting...`, 'success');
+    setTimeout(() => redirectByRole(profile?.role), 1200);
+
+  } catch (err) {
+    showAlert('❌ Something went wrong. Please try again.', 'error');
+    setLoading(false);
+  }
+}
+
+// Google login
+async function loginWithGoogle() {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin + '/auth/callback' }
+  });
+  if (error) showAlert('❌ Google login failed. Try again.', 'error');
+}
+
+// Enter key
+document.getElementById('password').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') handleLogin();
+});
+
+// Check if already logged in
+supabase.auth.getSession().then(({ data: { session } }) => {
+  if (session) {
+    supabase.from('profiles').select('role').eq('id', session.user.id).single()
+      .then(({ data }) => { if (data) redirectByRole(data.role); });
+  }
+});
+</script>
+</body>
+</html>

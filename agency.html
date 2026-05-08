@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minon Agency — Digital Services & Branding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Bricolage+Grotesque:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --navy:#0D1B3E;--teal:#2EC4B6;--orange:#F4762A;
+  --bg:#F5F7FA;--bg-card:#FFFFFF;
+  --text-primary:#0D1B3E;--text-secondary:#4A5568;--text-muted:#8896AB;
+  --border:rgba(13,27,62,0.1);--shadow:0 4px 24px rgba(13,27,62,0.08);
+  --shadow-lg:0 20px 60px rgba(13,27,62,0.14);
+  --success:#10B981;--error:#EF4444;
+}
+[data-theme="dark"]{
+  --bg:#070E1F;--bg-card:#0F1A35;
+  --text-primary:#F0F4FF;--text-secondary:#A8B8D8;--text-muted:#5A7090;
+  --border:rgba(255,255,255,0.07);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text-primary);transition:background 0.3s,color 0.3s;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,27,62,0.96);backdrop-filter:blur(16px);height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 5%;}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo-text{font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;}
+.nav-logo-text span{color:var(--orange);}
+.nav-links{display:flex;align-items:center;gap:1.5rem;}
+.nav-links a{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.875rem;font-weight:500;transition:color 0.2s;}
+.nav-links a:hover{color:#fff;}
+.nav-back{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.6)!important;font-size:0.8rem!important;}
+.nav-cta{background:var(--orange)!important;color:#fff!important;padding:7px 18px;border-radius:20px;font-weight:600!important;}
+
+/* HERO */
+.agency-hero{min-height:100vh;background:linear-gradient(135deg,#0D1B3E 0%,#1a0a00 60%,#2d1000 100%);display:flex;align-items:center;padding:100px 5% 60px;position:relative;overflow:hidden;}
+.hero-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.2;}
+.orb1{width:500px;height:500px;background:var(--orange);top:-150px;right:-100px;}
+.orb2{width:350px;height:350px;background:var(--teal);bottom:-100px;left:5%;}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:60px 60px;}
+.hero-content{position:relative;z-index:2;max-width:650px;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(244,118,42,0.15);border:1px solid rgba(244,118,42,0.3);color:var(--orange);padding:6px 16px;border-radius:30px;font-size:0.78rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.5rem;}
+.hero-title{font-family:'Clash Display',sans-serif;font-size:clamp(3rem,5.5vw,4.8rem);font-weight:700;color:#fff;line-height:1.05;margin-bottom:1.5rem;}
+.hero-title span{color:var(--orange);}
+.hero-desc{color:rgba(255,255,255,0.65);font-size:1.1rem;line-height:1.75;margin-bottom:2.5rem;max-width:520px;}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--orange);color:#fff;padding:14px 28px;border-radius:50px;font-weight:700;font-size:1rem;text-decoration:none;border:none;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;box-shadow:0 8px 30px rgba(244,118,42,0.4);transition:transform 0.2s,box-shadow 0.2s;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(244,118,42,0.5);}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.08);color:#fff;padding:14px 28px;border-radius:50px;font-weight:600;font-size:1rem;text-decoration:none;border:1.5px solid rgba(255,255,255,0.2);cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;transition:all 0.2s;}
+.btn-ghost:hover{background:rgba(255,255,255,0.14);}
+.hero-stats{display:flex;gap:2.5rem;margin-top:3.5rem;padding-top:2.5rem;border-top:1px solid rgba(255,255,255,0.1);flex-wrap:wrap;}
+.hero-stat-num{font-family:'Clash Display',sans-serif;font-size:2rem;font-weight:700;color:#fff;}
+.hero-stat-num span{color:var(--orange);}
+.hero-stat-label{font-size:0.78rem;color:rgba(255,255,255,0.45);margin-top:2px;}
+
+/* SECTIONS */
+section{padding:90px 5%;}
+.section-inner{max-width:1200px;margin:0 auto;}
+.eyebrow{display:inline-block;background:rgba(244,118,42,0.1);border:1px solid rgba(244,118,42,0.2);color:var(--orange);font-size:0.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:1rem;}
+.section-title{font-family:'Clash Display',sans-serif;font-size:clamp(2rem,3.5vw,3rem);font-weight:700;color:var(--text-primary);line-height:1.1;margin-bottom:1rem;}
+.section-desc{color:var(--text-muted);font-size:1rem;line-height:1.75;max-width:540px;margin-bottom:3rem;}
+
+/* HOW IT WORKS */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;position:relative;}
+.steps::before{content:'';position:absolute;top:36px;left:12%;right:12%;height:2px;background:linear-gradient(90deg,var(--orange),var(--teal));}
+.step{text-align:center;position:relative;z-index:1;}
+.step-num{width:72px;height:72px;border-radius:50%;background:var(--bg-card);border:3px solid var(--orange);display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-size:1.3rem;font-weight:700;color:var(--orange);margin:0 auto 1.2rem;box-shadow:0 0 0 6px rgba(244,118,42,0.08);}
+.step h4{font-family:'Clash Display',sans-serif;font-size:0.95rem;font-weight:700;color:var(--text-primary);margin-bottom:0.5rem;}
+.step p{font-size:0.82rem;color:var(--text-muted);line-height:1.6;}
+
+/* SERVICES */
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;}
+.service-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:20px;padding:2rem;transition:transform 0.3s,box-shadow 0.3s,border-color 0.3s;position:relative;overflow:hidden;cursor:pointer;}
+.service-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--orange),var(--teal));transform:scaleX(0);transform-origin:left;transition:transform 0.3s;}
+.service-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);border-color:transparent;}
+.service-card:hover::before{transform:scaleX(1);}
+.service-icon{font-size:2rem;margin-bottom:1rem;}
+.service-card h3{font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:0.5rem;}
+.service-card p{color:var(--text-muted);font-size:0.88rem;line-height:1.65;margin-bottom:1rem;}
+.service-price{font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;color:var(--orange);}
+
+/* PRICING */
+.pricing-section{background:linear-gradient(135deg,var(--navy) 0%,#1a0a00 100%);padding:90px 5%;}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem;}
+.pricing-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:2rem;position:relative;overflow:hidden;transition:transform 0.3s,border-color 0.3s;}
+.pricing-card:hover{transform:translateY(-4px);border-color:rgba(244,118,42,0.4);}
+.pricing-card.popular{border-color:var(--orange);}
+.popular-badge{position:absolute;top:1.5rem;right:1.5rem;background:var(--orange);color:#fff;font-size:0.68rem;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.5px;}
+.pricing-name{font-family:'Clash Display',sans-serif;font-size:1rem;font-weight:700;color:rgba(255,255,255,0.85);margin-bottom:0.5rem;}
+.pricing-price{font-family:'Clash Display',sans-serif;font-size:2.5rem;font-weight:700;color:#fff;margin-bottom:1.5rem;}
+.pricing-price small{font-size:1rem;color:rgba(255,255,255,0.5);}
+.pricing-features{list-style:none;display:flex;flex-direction:column;gap:0.7rem;margin-bottom:1.8rem;}
+.pricing-features li{display:flex;align-items:flex-start;gap:10px;color:rgba(255,255,255,0.7);font-size:0.875rem;}
+.pricing-features li::before{content:'✓';width:18px;height:18px;min-width:18px;background:rgba(46,196,182,0.2);color:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;margin-top:2px;}
+.pricing-btn{width:100%;padding:12px;border-radius:12px;border:none;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;font-size:0.9rem;font-weight:700;transition:all 0.2s;text-align:center;text-decoration:none;display:block;}
+.pricing-btn-outline{background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);}
+.pricing-btn-outline:hover{background:rgba(255,255,255,0.14);}
+.pricing-btn-solid{background:var(--orange);color:#fff;box-shadow:0 4px 20px rgba(244,118,42,0.3);}
+.pricing-btn-solid:hover{background:#d95f15;}
+
+/* BOOKING FORM */
+.booking-section{background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.booking-wrap{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;max-width:1200px;margin:0 auto;}
+.booking-form{background:var(--bg);border-radius:20px;padding:2.5rem;border:1.5px solid var(--border);}
+.form-group{margin-bottom:1.1rem;}
+.form-label{display:block;font-size:0.78rem;font-weight:700;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;}
+.form-input{width:100%;background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.9rem;color:var(--text-primary);outline:none;transition:border-color 0.2s;}
+.form-input:focus{border-color:var(--orange);}
+.form-input::placeholder{color:var(--text-muted);}
+textarea.form-input{resize:vertical;}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.submit-btn{width:100%;background:var(--orange);color:#fff;border:none;border-radius:12px;padding:14px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s;margin-top:8px;}
+.submit-btn:hover{background:#d95f15;transform:translateY(-1px);}
+.submit-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+
+/* CAC SECTION */
+.cac-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:2rem;}
+.cac-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:16px;padding:1.5rem;text-align:center;transition:border-color 0.2s,transform 0.2s;}
+.cac-card:hover{border-color:var(--orange);transform:translateY(-3px);}
+.cac-icon{font-size:2rem;margin-bottom:0.8rem;}
+.cac-name{font-family:'Clash Display',sans-serif;font-size:0.9rem;font-weight:700;color:var(--text-primary);margin-bottom:0.3rem;}
+.cac-price{font-size:1.4rem;font-weight:700;color:var(--orange);font-family:'Clash Display',sans-serif;}
+.cac-desc{font-size:0.72rem;color:var(--text-muted);margin-top:4px;}
+
+/* CTA */
+.cta-section{background:linear-gradient(135deg,var(--navy),#1a0a00);padding:90px 5%;text-align:center;}
+.cta-section h2{font-family:'Clash Display',sans-serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:700;color:#fff;margin-bottom:1rem;}
+.cta-section p{color:rgba(255,255,255,0.6);font-size:1rem;margin-bottom:2.5rem;}
+
+/* FOOTER */
+footer{background:#050D1F;color:rgba(255,255,255,0.5);text-align:center;padding:2rem 5%;font-size:0.85rem;}
+footer strong{color:var(--orange);}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;}
+.badge-success{background:rgba(16,185,129,0.12);color:var(--success);}
+.badge-orange{background:rgba(244,118,42,0.12);color:var(--orange);}
+
+/* ALERT */
+.alert{border-radius:10px;padding:12px 16px;font-size:0.85rem;margin-top:1rem;display:none;}
+.alert.success{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:var(--success);display:block;}
+.alert.error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:var(--error);display:block;}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+@media(max-width:1024px){.pricing-grid{grid-template-columns:repeat(2,1fr);}.booking-wrap{grid-template-columns:1fr;}.steps{grid-template-columns:repeat(2,1fr);}.steps::before{display:none;}}
+@media(max-width:768px){.nav-links{display:none;}.pricing-grid{grid-template-columns:1fr;}.steps{grid-template-columns:1fr;}.hero-title{font-size:2.8rem;}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-text">Min<span>o</span>n Solutions</div>
+  </a>
+  <div class="nav-links">
+    <a href="/" class="nav-back">← Back to Home</a>
+    <a href="#services">Services</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#cac">CAC Registration</a>
+    <a href="#book">Book Now</a>
+    <a href="/signup" class="nav-cta">Get Started</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="agency-hero">
+  <div class="hero-orb orb1"></div>
+  <div class="hero-orb orb2"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">🎨 Minon Agency</div>
+    <h1 class="hero-title">Grow Your Business<br>with <span>Digital Power</span></h1>
+    <p class="hero-desc">From Meta ads that convert, to CAC business registration, to stunning branding — Minon Agency is your all-in-one digital partner. We serve all of Nigeria.</p>
+    <div class="hero-actions">
+      <a href="#book" class="btn-primary">Book a Service 🚀</a>
+      <a href="#pricing" class="btn-ghost">View Pricing →</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hero-stat-num">500<span>+</span></div><div class="hero-stat-label">Businesses Served</div></div>
+      <div><div class="hero-stat-num">₦20K</div><div class="hero-stat-label">Ads from</div></div>
+      <div><div class="hero-stat-num">5<span>yrs</span></div><div class="hero-stat-label">Experience</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section style="background:var(--bg-card);border-bottom:1px solid var(--border);">
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center;margin-bottom:3rem;">
+      <div class="eyebrow">How It Works</div>
+      <h2 class="section-title">Simple. Fast. Results.</h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><div class="step-num">01</div><h4>Choose a Service</h4><p>Browse our packages — Meta Ads, CAC Registration, Branding, Content and more.</p></div>
+      <div class="step reveal"><div class="step-num">02</div><h4>Book & Pay</h4><p>Fill the booking form or contact us. Transfer to our Moniepoint account and upload receipt.</p></div>
+      <div class="step reveal"><div class="step-num">03</div><h4>We Get to Work</h4><p>Our team of experts handles everything — creatives, setup, management, optimization.</p></div>
+      <div class="step reveal"><div class="step-num">04</div><h4>See Results</h4><p>Get reports, certificates, designs or live campaigns — delivered fast and professionally.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="eyebrow">What We Offer</div>
+      <h2 class="section-title">Our Digital Services</h2>
+      <p class="section-desc">Everything your business needs to grow online and stay compliant.</p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="service-icon">📱</div>
+        <h3>Meta Ads (Facebook & Instagram)</h3>
+        <p>All-inclusive ad campaigns — creatives, setup, management, optimization, reporting and ad spend all included. We run ads that actually convert.</p>
+        <div class="service-price">From ₦20,000</div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">🏢</div>
+        <h3>CAC Business Registration</h3>
+        <p>Register your business officially with the Corporate Affairs Commission. Business Name, LTD, NGO, Trademark and SCUML certificates.</p>
+        <div class="service-price">From ₦30,000</div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">🎨</div>
+        <h3>Branding & Logo Design</h3>
+        <p>Professional brand identity — logo, brand colours, typography, brand guidelines and all design assets delivered in multiple formats.</p>
+        <div class="service-price">From ₦15,000</div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">📸</div>
+        <h3>Social Media Management</h3>
+        <p>Full management of your Instagram, Facebook, TikTok and Twitter. Content calendar, posting, engagement and monthly reports.</p>
+        <div class="service-price">Get a Quote</div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">🎬</div>
+        <h3>Video Editing & Content</h3>
+        <p>Short-form videos, Reels, TikToks, promos and testimonials. Professional editing with captions, colour grading and music.</p>
+        <div class="service-price">Get a Quote</div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">🌐</div>
+        <h3>Website Design</h3>
+        <p>Modern, mobile-first websites that convert visitors into customers. Fast, SEO-ready and connected to your brand.</p>
+        <div class="service-price">Get a Quote</div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">🖨️</div>
+        <h3>Flyer & Graphic Design</h3>
+        <p>Eye-catching print and digital designs — flyers, banners, business cards, certificates and branded materials.</p>
+        <div class="service-price">From ₦5,000</div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">📊</div>
+        <h3>Business Visibility Package</h3>
+        <p>Boost your brand presence online and offline. Social media boost, featured listing, content creation and brand strategy.</p>
+        <div class="service-price">Get a Quote</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- META ADS PRICING -->
+<section class="pricing-section" id="pricing">
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center;margin-bottom:0;">
+      <div class="eyebrow" style="background:rgba(244,118,42,0.15);border-color:rgba(244,118,42,0.3);">Meta Ads Packages</div>
+      <h2 class="section-title" style="color:#fff;">All-Inclusive Meta Ads</h2>
+      <p style="color:rgba(255,255,255,0.55);font-size:1rem;max-width:540px;margin:0 auto 3rem;">Creatives + Setup + Management + Optimization + Reports + Ad Spend — Everything Included.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card reveal">
+        <div class="pricing-name">Starter</div>
+        <div class="pricing-price">₦20,000</div>
+        <ul class="pricing-features">
+          <li>3 Static Creatives</li>
+          <li>1 Campaign (7 Days)</li>
+          <li>₦10,000 Ad Spend</li>
+          <li>8k–20k Impressions</li>
+          <li>150–400 Engagements</li>
+        </ul>
+        <a href="#book" class="pricing-btn pricing-btn-outline">Book Now</a>
+      </div>
+      <div class="pricing-card reveal">
+        <div class="pricing-name">Growth</div>
+        <div class="pricing-price">₦40,000</div>
+        <ul class="pricing-features">
+          <li>6 Creatives (Static + Videos)</li>
+          <li>2 Campaigns (14 Days)</li>
+          <li>₦25,000 Ad Spend</li>
+          <li>25k–60k Impressions</li>
+          <li>400–1k Clicks/Leads</li>
+        </ul>
+        <a href="#book" class="pricing-btn pricing-btn-outline">Book Now</a>
+      </div>
+      <div class="pricing-card popular reveal">
+        <div class="popular-badge">POPULAR</div>
+        <div class="pricing-name">Premium</div>
+        <div class="pricing-price">₦60,000</div>
+        <ul class="pricing-features">
+          <li>10 Premium Creatives</li>
+          <li>3 Campaigns + Retargeting</li>
+          <li>₦40,000 Ad Spend</li>
+          <li>40k–120k+ Impressions</li>
+          <li>800–2.5k Interactions</li>
+        </ul>
+        <a href="#book" class="pricing-btn pricing-btn-solid">Book Now</a>
+      </div>
+      <div class="pricing-card reveal">
+        <div class="pricing-name">Pro</div>
+        <div class="pricing-price">₦85,000</div>
+        <ul class="pricing-features">
+          <li>15 High-End Creatives</li>
+          <li>Advanced Campaigns (30 Days)</li>
+          <li>₦60,000 Ad Spend</li>
+          <li>Trackable Leads & Sales</li>
+          <li>Strong ROI</li>
+        </ul>
+        <a href="#book" class="pricing-btn pricing-btn-outline">Book Now</a>
+      </div>
+      <div class="pricing-card reveal" style="grid-column:span 2;">
+        <div class="popular-badge" style="background:rgba(46,196,182,0.3);color:var(--teal);">ENTERPRISE</div>
+        <div class="pricing-name">Enterprise</div>
+        <div class="pricing-price">₦120,000<small>/month</small></div>
+        <ul class="pricing-features" style="columns:2;gap:1rem;">
+          <li>Unlimited Creatives & Campaigns</li>
+          <li>Full Monthly Management</li>
+          <li>₦80k–₦100k+ Ad Spend</li>
+          <li>Consistent Brand Growth</li>
+          <li>Dedicated Account Manager</li>
+          <li>Monthly Reports</li>
+        </ul>
+        <a href="#book" class="pricing-btn pricing-btn-solid" style="max-width:280px;">Contact Us</a>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:1.5rem;font-size:0.85rem;color:var(--teal);font-weight:600;">🎉 Combo Bonus: Add CAC Registration with any Meta Ads package and save ₦5,000!</p>
+  </div>
+</section>
+
+<!-- CAC REGISTRATION -->
+<section id="cac">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="eyebrow">CAC Registration</div>
+      <h2 class="section-title">Register Your Business Officially</h2>
+      <p class="section-desc">Get your business officially registered with the Corporate Affairs Commission. Fast, stress-free and fully handled by our team.</p>
+    </div>
+    <div class="cac-grid">
+      <div class="cac-card reveal"><div class="cac-icon">🏢</div><div class="cac-name">Business Name</div><div class="cac-price">₦30,000</div><div class="cac-desc">Certificate & Status Report</div></div>
+      <div class="cac-card reveal"><div class="cac-icon">🏛️</div><div class="cac-name">Limited Company (LTD)</div><div class="cac-price">₦50,000</div><div class="cac-desc">Certificate, MEMART & Status Report</div></div>
+      <div class="cac-card reveal"><div class="cac-icon">⛪</div><div class="cac-name">NGO / Church / Mosque</div><div class="cac-price">₦130,000</div><div class="cac-desc">Trustees, Constitution & Publication</div></div>
+      <div class="cac-card reveal"><div class="cac-icon">🛡️</div><div class="cac-name">SCUML Certificate</div><div class="cac-price">₦30,000</div><div class="cac-desc">Anti-Money Laundering (EFCC)</div></div>
+      <div class="cac-card reveal"><div class="cac-icon">™️</div><div class="cac-name">Trademark</div><div class="cac-price">₦50,000</div><div class="cac-desc">Brand Protection Certificate</div></div>
+    </div>
+    <div style="margin-top:2rem;background:rgba(46,196,182,0.06);border:1px solid rgba(46,196,182,0.2);border-radius:14px;padding:16px 20px;">
+      <p style="font-size:0.85rem;color:var(--teal);font-weight:600;">💡 Refer a business to us and earn commissions: Business Name ₦3,000 | LTD ₦5,000 | NGO/Church ₦7,000</p>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING FORM -->
+<section class="booking-section" id="book">
+  <div class="booking-wrap" style="padding:90px 0;">
+    <div class="reveal">
+      <div class="eyebrow">Book a Service</div>
+      <h2 class="section-title">Ready to Grow?</h2>
+      <p class="section-desc">Fill the form and our team will reach out within 24 hours to discuss your project.</p>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:1.5rem;">
+        <div style="display:flex;align-items:center;gap:12px;font-size:0.9rem;color:var(--text-secondary);"><span style="font-size:1.2rem;">⚡</span> Fast response within 24 hours</div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:0.9rem;color:var(--text-secondary);"><span style="font-size:1.2rem;">🇳🇬</span> We serve all of Nigeria</div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:0.9rem;color:var(--text-secondary);"><span style="font-size:1.2rem;">💬</span> WhatsApp: 08118007861</div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:0.9rem;color:var(--text-secondary);"><span style="font-size:1.2rem;">✉️</span> minonsolutions5@gmail.com</div>
+      </div>
+    </div>
+    <div class="booking-form reveal">
+      <h3 style="font-family:'Clash Display',sans-serif;font-size:1.3rem;font-weight:700;color:var(--text-primary);margin-bottom:1.5rem;">Book a Service</h3>
+      <div id="bookingAlert"></div>
+      <div class="form-row-2">
+        <div class="form-group"><label class="form-label">Full Name *</label><input class="form-input" id="bookName" placeholder="Your full name"></div>
+        <div class="form-group"><label class="form-label">Phone *</label><input class="form-input" id="bookPhone" placeholder="08xxxxxxxxx"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="bookEmail" type="email" placeholder="email@example.com"></div>
+      <div class="form-group"><label class="form-label">Service Needed *</label>
+        <select class="form-input" id="bookService">
+          <option value="">-- Select a Service --</option>
+          <optgroup label="Meta Ads">
+            <option>Meta Ads — Starter (₦20,000)</option>
+            <option>Meta Ads — Growth (₦40,000)</option>
+            <option>Meta Ads — Premium (₦60,000)</option>
+            <option>Meta Ads — Pro (₦85,000)</option>
+            <option>Meta Ads — Enterprise (₦120,000/month)</option>
+          </optgroup>
+          <optgroup label="CAC Registration">
+            <option>Business Name Registration (₦30,000)</option>
+            <option>Limited Company / LTD (₦50,000)</option>
+            <option>NGO / Church / Mosque (₦130,000)</option>
+            <option>SCUML Certificate (₦30,000)</option>
+            <option>Trademark Registration (₦50,000)</option>
+          </optgroup>
+          <optgroup label="Digital Services">
+            <option>Branding & Logo Design</option>
+            <option>Social Media Management</option>
+            <option>Video Editing & Content</option>
+            <option>Website Design</option>
+            <option>Flyer & Graphic Design</option>
+            <option>Business Visibility Package</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Business Name</label><input class="form-input" id="bookBusiness" placeholder="Your business name (if applicable)"></div>
+      <div class="form-group"><label class="form-label">Tell us about your project</label><textarea class="form-input" id="bookMessage" rows="4" placeholder="Describe your goals, target audience, timeline..."></textarea></div>
+      <button class="submit-btn" onclick="submitBooking()" id="bookBtn">Submit Booking Request 🚀</button>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="section-inner">
+    <h2 class="reveal">Nigeria's Business Partner</h2>
+    <p class="reveal">Let's grow your business together. WhatsApp us now!</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;" class="reveal">
+      <a href="https://wa.me/2348118007861" target="_blank" class="btn-primary" style="background:#25D366;box-shadow:0 8px 30px rgba(37,211,102,0.3);">💬 WhatsApp: 08118007861</a>
+      <a href="mailto:minonsolutions5@gmail.com" class="btn-ghost">✉️ Email Us</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 <strong>Minon Agency</strong> — A Branch of Minon Solutions · RC 8965878 · Awka, Anambra State</p>
+  <p style="margin-top:6px;"><a href="/" style="color:var(--teal);text-decoration:none;">← Back to Minon Solutions</a></p>
+</footer>
+
+<script>
+const SUPABASE_URL='https://rmwvrbpkxbxmbpidzbfe.supabase.co';
+const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtd3ZyYnBreGJ4bWJwaWR6YmZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MTE2ODIsImV4cCI6MjA5MjM4NzY4Mn0.aIbszMyL8lAMsF2T4-oSjHbuGr1b5-Az3fI4lGd0aYM';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+
+// Scroll reveal
+const reveals=document.querySelectorAll('.reveal');
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach((entry,i)=>{if(entry.isIntersecting){setTimeout(()=>entry.target.classList.add('visible'),i*80);observer.unobserve(entry.target);}});
+},{threshold:0.1});
+reveals.forEach(el=>observer.observe(el));
+
+// Booking form
+async function submitBooking(){
+  const name=document.getElementById('bookName').value.trim();
+  const phone=document.getElementById('bookPhone').value.trim();
+  const service=document.getElementById('bookService').value;
+  const email=document.getElementById('bookEmail').value.trim();
+  const business=document.getElementById('bookBusiness').value.trim();
+  const message=document.getElementById('bookMessage').value.trim();
+  const alertEl=document.getElementById('bookingAlert');
+  const btn=document.getElementById('bookBtn');
+
+  if(!name||!phone||!service){
+    alertEl.className='alert error';alertEl.textContent='⚠️ Please fill in name, phone and service.';return;
+  }
+
+  btn.disabled=true;btn.textContent='Submitting...';
+
+  try{
+    await sb.from('contact_messages').insert({
+      full_name:name,email:email||'—',phone,
+      subject:`Agency Booking: ${service}`,
+      message:`Business: ${business||'N/A'}\n\nService: ${service}\n\nMessage: ${message||'No additional message'}`
+    });
+    alertEl.className='alert success';
+    alertEl.textContent='✅ Booking submitted! We will contact you within 24 hours via WhatsApp.';
+    ['bookName','bookPhone','bookEmail','bookBusiness','bookMessage'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('bookService').value='';
+  }catch(e){
+    alertEl.className='alert error';alertEl.textContent='❌ Something went wrong. WhatsApp us directly: 08118007861';
+  }
+  btn.disabled=false;btn.textContent='Submit Booking Request 🚀';
+}
+</script>
+</body>
+</html>

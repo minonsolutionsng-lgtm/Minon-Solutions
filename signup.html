@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+
+<script>
+// Global theme persistence - runs before body renders
+(function(){
+  var t=localStorage.getItem('minon-theme');
+  if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}
+  else{document.documentElement.setAttribute('data-theme','light');}
+})();
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up — Minon Solutions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Bricolage+Grotesque:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>if(typeof window.supabase==='undefined'){var _s=document.createElement('script');_s.src='https://unpkg.com/@supabase/supabase-js@2';document.head.appendChild(_s);}</script>
+<script>
+// Fallback if CDN fails
+if (typeof window.supabase === 'undefined') {
+  var s = document.createElement('script');
+  s.src = 'https://unpkg.com/@supabase/supabase-js@2';
+  s.onerror = function() {
+    var s2 = document.createElement('script');
+    s2.src = 'https://esm.sh/@supabase/supabase-js@2';
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s);
+}
+</script>
+<style>
+:root {
+  --navy: #0D1B3E; --teal: #2EC4B6; --orange: #F4762A;
+  --bg: #F5F7FA; --bg-card: #FFFFFF;
+  --text-primary: #0D1B3E; --text-secondary: #4A5568; --text-muted: #8896AB;
+  --border: rgba(13,27,62,0.12); --shadow-lg: 0 20px 60px rgba(13,27,62,0.12);
+  --error: #EF4444; --success: #10B981;
+}
+[data-theme="dark"] {
+  --bg: #070E1F; --bg-card: #0F1A35;
+  --text-primary: #F0F4FF; --text-secondary: #A8B8D8; --text-muted: #5A7090;
+  --border: rgba(255,255,255,0.08); --shadow-lg: 0 20px 60px rgba(0,0,0,0.4);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  background: var(--bg); color: var(--text-primary);
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* STEPS NAV */
+.signup-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 5%;
+}
+.signup-logo {
+  display: flex; align-items: center; gap: 10px; text-decoration: none;
+}
+.signup-logo-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--teal), var(--orange));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Clash Display', sans-serif; font-weight: 700; color: #fff; font-size: 1rem;
+}
+.signup-logo-text { font-family: 'Clash Display', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+.signup-logo-text span { color: var(--orange); }
+
+.steps-indicator {
+  display: flex; align-items: center; gap: 8px;
+}
+.step-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--border); transition: all 0.3s;
+}
+.step-dot.active { background: var(--orange); width: 24px; border-radius: 4px; }
+.step-dot.done { background: var(--teal); }
+
+.theme-toggle {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 1.5px solid var(--border); background: var(--bg);
+  cursor: pointer; font-size: 0.95rem;
+  display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+}
+
+/* MAIN */
+.signup-main {
+  min-height: 100vh; padding-top: 84px;
+  display: flex; align-items: center; justify-content: center;
+  padding-bottom: 40px;
+}
+
+.signup-wrap { width: 100%; max-width: 580px; padding: 0 24px; }
+
+/* STEP PANELS */
+.step-panel { display: none; animation: fadeIn 0.4s ease; }
+.step-panel.active { display: block; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+.step-title {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 2rem; font-weight: 700; color: var(--text-primary);
+  margin-bottom: 0.4rem;
+}
+.step-sub { color: var(--text-muted); font-size: 0.92rem; margin-bottom: 2rem; }
+.step-sub a { color: var(--teal); text-decoration: none; font-weight: 600; }
+
+/* ROLE GRID */
+.role-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 12px; margin-bottom: 2rem;
+}
+.role-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: 16px; padding: 1.2rem;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: flex-start; gap: 12px;
+  position: relative;
+}
+.role-card:hover { border-color: var(--teal); transform: translateY(-2px); }
+.role-card.selected { border-color: var(--orange); background: rgba(244,118,42,0.04); }
+.role-card.selected::after {
+  content: '✓';
+  position: absolute; top: 10px; right: 12px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--orange); color: #fff;
+  font-size: 0.65rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.role-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; flex-shrink: 0;
+}
+.role-name { font-weight: 700; font-size: 0.9rem; color: var(--text-primary); margin-bottom: 2px; }
+.role-desc { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; }
+
+/* Form */
+.form-group { margin-bottom: 1.1rem; }
+.form-label { display: block; font-size: 0.83rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 5px; }
+.form-input {
+  width: 100%; background: var(--bg);
+  border: 1.5px solid var(--border); border-radius: 12px;
+  padding: 12px 16px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 0.92rem; color: var(--text-primary);
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(46,196,182,0.1); }
+.form-input.error { border-color: var(--error); }
+.form-input::placeholder { color: var(--text-muted); }
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.input-wrap { position: relative; }
+.input-wrap .form-input { padding-right: 44px; }
+.toggle-pw {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  cursor: pointer; color: var(--text-muted); background: none; border: none; font-size: 1rem;
+}
+
+.pw-strength { margin-top: 6px; }
+.pw-bars { display: flex; gap: 4px; margin-bottom: 4px; }
+.pw-bar { height: 3px; flex: 1; border-radius: 2px; background: var(--border); transition: background 0.3s; }
+.pw-bar.weak { background: var(--error); }
+.pw-bar.medium { background: #F59E0B; }
+.pw-bar.strong { background: var(--success); }
+.pw-label { font-size: 0.72rem; color: var(--text-muted); }
+
+/* Terms */
+.terms-check {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 0.84rem; color: var(--text-secondary);
+  margin-bottom: 1.2rem; cursor: pointer;
+}
+.terms-check input { accent-color: var(--orange); margin-top: 2px; flex-shrink: 0; }
+.terms-check a { color: var(--teal); text-decoration: none; font-weight: 600; }
+
+/* Referral */
+.referral-box {
+  background: rgba(46,196,182,0.06);
+  border: 1px solid rgba(46,196,182,0.2);
+  border-radius: 12px; padding: 12px 16px;
+  margin-bottom: 1.2rem;
+  display: flex; align-items: center; gap: 10px;
+}
+.referral-box span { font-size: 1.2rem; }
+.referral-text { font-size: 0.82rem; color: var(--text-secondary); }
+.referral-text strong { color: var(--teal); }
+
+/* Buttons */
+.btn-row { display: flex; gap: 10px; margin-top: 1.5rem; }
+.btn-back {
+  flex: 1;
+  background: var(--bg); color: var(--text-primary);
+  border: 1.5px solid var(--border); border-radius: 12px;
+  padding: 13px; font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 0.95rem; font-weight: 600; cursor: pointer;
+  transition: border-color 0.2s;
+}
+.btn-back:hover { border-color: var(--text-muted); }
+.btn-next {
+  flex: 2;
+  background: var(--navy); color: #fff;
+  border: none; border-radius: 12px;
+  padding: 13px; font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 0.95rem; font-weight: 700; cursor: pointer;
+  transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 4px 20px rgba(13,27,62,0.2);
+}
+.btn-next:hover { background: #162347; transform: translateY(-1px); }
+.btn-next:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.btn-next.orange { background: var(--orange); box-shadow: 0 4px 20px rgba(244,118,42,0.3); }
+.btn-next.orange:hover { background: #d95f15; }
+
+.google-btn {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: var(--bg-card); border: 1.5px solid var(--border); border-radius: 12px;
+  padding: 13px; font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 0.92rem; font-weight: 600; color: var(--text-primary); cursor: pointer;
+  transition: border-color 0.2s; margin-bottom: 1.2rem;
+}
+.google-btn:hover { border-color: var(--teal); }
+
+.divider { display: flex; align-items: center; gap: 12px; margin-bottom: 1.2rem; }
+.divider::before, .divider::after { content: ''; flex:1; height:1px; background: var(--border); }
+.divider span { color: var(--text-muted); font-size: 0.78rem; }
+
+/* Alert */
+.alert {
+  border-radius: 10px; padding: 11px 14px;
+  font-size: 0.84rem; margin-bottom: 1rem;
+  display: none; align-items: center; gap: 8px;
+}
+.alert.error { background: rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); color:var(--error); display:flex; }
+.alert.success { background: rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); color:var(--success); display:flex; }
+
+/* Success screen */
+.success-screen {
+  text-align: center; padding: 3rem 1rem;
+}
+.success-icon {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), var(--navy));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; margin: 0 auto 1.5rem;
+  box-shadow: 0 0 0 12px rgba(46,196,182,0.1);
+}
+.success-screen h3 {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 1.8rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.8rem;
+}
+.success-screen p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.7; margin-bottom: 2rem; }
+
+/* Tutorial overlay (simplified) */
+.tutorial-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(7,14,31,0.8); backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center;
+}
+.tutorial-card {
+  background: var(--bg-card); border-radius: 24px; padding: 2.5rem;
+  max-width: 420px; width: 90%; text-align: center;
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow-lg);
+}
+.tutorial-emoji { font-size: 3rem; margin-bottom: 1rem; }
+.tutorial-card h3 {
+  font-family: 'Clash Display', sans-serif; font-size: 1.5rem; font-weight: 700;
+  color: var(--text-primary); margin-bottom: 0.8rem;
+}
+.tutorial-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 1.5rem; }
+.tutorial-steps { display: flex; justify-content: center; gap: 6px; margin-bottom: 1.5rem; }
+.tutorial-step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: background 0.3s; }
+.tutorial-step-dot.active { background: var(--orange); }
+.tutorial-btn {
+  background: var(--orange); color: #fff; border: none;
+  border-radius: 12px; padding: 12px 28px;
+  font-family: 'Bricolage Grotesque', sans-serif; font-size: 0.95rem; font-weight: 700;
+  cursor: pointer; transition: background 0.2s;
+  width: 100%;
+}
+.tutorial-btn:hover { background: #d95f15; }
+.tutorial-skip { color: var(--text-muted); font-size: 0.82rem; cursor: pointer; margin-top: 0.8rem; display: block; }
+.tutorial-skip:hover { color: var(--text-primary); }
+
+.spinner { width:18px; height:18px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; display:none; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+@media (max-width: 600px) {
+  .role-grid { grid-template-columns: 1fr; }
+  .form-row-2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="signup-nav">
+  <a href="/" class="signup-logo">
+    <img src="/logo.png" alt="Minon Solutions" style="height:52px;width:auto;object-fit:contain;">
+    <div class="signup-logo-text">Min<span>o</span>n Solutions</div>
+  </a>
+  <div class="steps-indicator">
+    <div class="step-dot active" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+    <div class="step-dot" id="dot4"></div>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+</nav>
+
+<div class="signup-main">
+  <div class="signup-wrap">
+
+    <!-- ALERT -->
+    <div class="alert" id="alertBox"></div>
+
+    <!-- STEP 1: ROLE SELECTION -->
+    <div class="step-panel active" id="step1">
+      <div class="step-title">Who are you? 👋</div>
+      <div class="step-sub">Choose your role to get a personalised experience. Already have an account? <a href="/login">Sign in</a></div>
+
+      <div class="role-grid" id="roleGrid">
+        <div class="role-card" onclick="selectRole('buyer', this)">
+          <div class="role-icon" style="background:rgba(46,196,182,0.1);">🛒</div>
+          <div><div class="role-name">Buyer / Customer</div><div class="role-desc">Shop, order food, book services & properties</div></div>
+        </div>
+        <div class="role-card" onclick="selectRole('vendor', this)">
+          <div class="role-icon" style="background:rgba(99,102,241,0.1);">🏪</div>
+          <div><div class="role-name">Vendor</div><div class="role-desc">Sell products on Minon Market</div></div>
+        </div>
+        <div class="role-card" onclick="selectRole('service_provider', this)">
+          <div class="role-icon" style="background:rgba(244,118,42,0.1);">🔧</div>
+          <div><div class="role-name">Service Provider</div><div class="role-desc">Offer skilled services (plumber, electrician etc)</div></div>
+        </div>
+        <div class="role-card" onclick="selectRole('dispatch_rider', this)">
+          <div class="role-icon" style="background:rgba(16,185,129,0.1);">🚚</div>
+          <div><div class="role-name">Dispatch Rider</div><div class="role-desc">Deliver packages and earn with Minon Logistics</div></div>
+        </div>
+        <div class="role-card" onclick="selectRole('tutor', this)">
+          <div class="role-icon" style="background:rgba(245,158,11,0.1);">📚</div>
+          <div><div class="role-name">Tutor</div><div class="role-desc">Teach students on Minon Study</div></div>
+        </div>
+        <div class="role-card" onclick="selectRole('realtor', this)">
+          <div class="role-icon" style="background:rgba(13,27,62,0.06);">🏠</div>
+          <div><div class="role-name">Realtor</div><div class="role-desc">List properties for sale, rent & shortlet</div></div>
+        </div>
+        <div class="role-card" onclick="selectRole('restaurant_owner', this)">
+          <div class="role-icon" style="background:rgba(239,68,68,0.1);">🍽️</div>
+          <div><div class="role-name">Restaurant Owner</div><div class="role-desc">List your restaurant & receive food orders</div></div>
+        </div>
+        <div class="role-card" onclick="selectRole('freelancer', this)">
+          <div class="role-icon" style="background:rgba(46,196,182,0.1);">💼</div>
+          <div><div class="role-name">Freelancer</div><div class="role-desc">Work on digital projects through Minon Agency</div></div>
+        </div>
+      </div>
+
+      <button class="btn-next orange" style="width:100%;" onclick="goToStep(2)">
+        Continue
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <!-- STEP 2: GOOGLE OR EMAIL -->
+    <div class="step-panel" id="step2">
+      <div class="step-title">Create Account</div>
+      <div class="step-sub">Sign up with Google or fill in your details below.</div>
+
+      <button class="google-btn" onclick="signupWithGoogle()">
+        <span style="font-size:1.1rem;">G</span>
+        Continue with Google
+      </button>
+      <div class="divider"><span>or continue with email</span></div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          <input class="form-input" id="firstName" type="text" placeholder="e.g. Michael">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          <input class="form-input" id="lastName" type="text" placeholder="e.g. Okonkwo">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" id="email" type="email" placeholder="email@example.com">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input class="form-input" id="phone" type="tel" placeholder="08xxxxxxxxx">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="input-wrap">
+          <input class="form-input" id="password" type="password" placeholder="Min. 8 characters" oninput="checkPassword(this.value)">
+          <button class="toggle-pw" onclick="togglePassword('password', this)" type="button">👁️</button>
+        </div>
+        <div class="pw-strength">
+          <div class="pw-bars">
+            <div class="pw-bar" id="bar1"></div>
+            <div class="pw-bar" id="bar2"></div>
+            <div class="pw-bar" id="bar3"></div>
+            <div class="pw-bar" id="bar4"></div>
+          </div>
+          <div class="pw-label" id="pwLabel">Enter a password</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Confirm Password</label>
+        <div class="input-wrap">
+          <input class="form-input" id="confirmPassword" type="password" placeholder="Repeat your password">
+          <button class="toggle-pw" onclick="togglePassword('confirmPassword', this)" type="button">👁️</button>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="goToStep(1)">← Back</button>
+        <button class="btn-next orange" onclick="goToStep(3)">
+          Continue
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 3: REFERRAL + TERMS -->
+    <div class="step-panel" id="step3">
+      <div class="step-title">Almost There 🎉</div>
+      <div class="step-sub">Got a referral code? Enter it and earn ₦300 bonus for your referrer.</div>
+
+      <div class="referral-box">
+        <span>🎁</span>
+        <div class="referral-text">When someone referred you signs up and makes their first payment, your referrer earns <strong>₦300</strong> automatically!</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Referral Code (Optional)</label>
+        <input class="form-input" id="referralCode" type="text" placeholder="e.g. MINON123" style="text-transform:uppercase;">
+      </div>
+
+      <div class="form-group" id="locationFields" style="display:none;">
+        <label class="form-label">State</label>
+        <select class="form-input" id="state">
+          <option value="">Select State</option>
+          <option value="Abia">Abia</option><option value="Adamawa">Adamawa</option>
+          <option value="Akwa Ibom">Akwa Ibom</option><option value="Anambra" selected>Anambra</option>
+          <option value="Bauchi">Bauchi</option><option value="Bayelsa">Bayelsa</option>
+          <option value="Benue">Benue</option><option value="Borno">Borno</option>
+          <option value="Cross River">Cross River</option><option value="Delta">Delta</option>
+          <option value="Ebonyi">Ebonyi</option><option value="Edo">Edo</option>
+          <option value="Ekiti">Ekiti</option><option value="Enugu">Enugu</option>
+          <option value="FCT">FCT - Abuja</option><option value="Gombe">Gombe</option>
+          <option value="Imo">Imo</option><option value="Jigawa">Jigawa</option>
+          <option value="Kaduna">Kaduna</option><option value="Kano">Kano</option>
+          <option value="Katsina">Katsina</option><option value="Kebbi">Kebbi</option>
+          <option value="Kogi">Kogi</option><option value="Kwara">Kwara</option>
+          <option value="Lagos">Lagos</option><option value="Nasarawa">Nasarawa</option>
+          <option value="Niger">Niger</option><option value="Ogun">Ogun</option>
+          <option value="Ondo">Ondo</option><option value="Osun">Osun</option>
+          <option value="Oyo">Oyo</option><option value="Plateau">Plateau</option>
+          <option value="Rivers">Rivers</option><option value="Sokoto">Sokoto</option>
+          <option value="Taraba">Taraba</option><option value="Yobe">Yobe</option>
+          <option value="Zamfara">Zamfara</option>
+        </select>
+      </div>
+
+      <label class="terms-check">
+        <input type="checkbox" id="termsCheck">
+        I have read and agree to Minon Solutions' <a href="/terms" target="_blank">Terms & Conditions</a> and <a href="/privacy" target="_blank">Privacy Policy</a>. I understand that by creating an account, I accept all platform rules.
+      </label>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="goToStep(2)">← Back</button>
+        <button class="btn-next orange" onclick="goToStep(4)">
+          Review & Submit
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 4: CONFIRM & SUBMIT -->
+    <div class="step-panel" id="step4">
+      <div class="step-title">Confirm Details ✅</div>
+      <div class="step-sub">Double-check everything before creating your account.</div>
+
+      <div id="summaryCard" style="background:var(--bg-card); border:1.5px solid var(--border); border-radius:16px; padding:1.5rem; margin-bottom:1.5rem;">
+        <div id="summaryContent"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="goToStep(3)">← Back</button>
+        <button class="btn-next orange" onclick="handleSignup()" id="submitBtn">
+          <div class="spinner" id="submitSpinner"></div>
+          <span id="submitText">Create My Account 🚀</span>
+        </button>
+      </div>
+
+      <div class="auth-switch" style="text-align:center; margin-top:1.2rem; font-size:0.85rem; color:var(--text-muted);">
+        Already have an account? <a href="/login" style="color:var(--teal); text-decoration:none; font-weight:600;">Sign in</a>
+      </div>
+    </div>
+
+    <!-- STEP 5: SUCCESS -->
+    <div class="step-panel" id="step5">
+      <div class="success-screen">
+        <div class="success-icon">🎉</div>
+        <h3>Welcome to Minon Solutions!</h3>
+        <p>Your account has been created successfully. You will be redirected to your dashboard now!</p>
+        <a href="/login" style="display:inline-block; background:var(--orange); color:#fff; padding:14px 32px; border-radius:12px; font-weight:700; text-decoration:none; font-size:0.95rem; box-shadow:0 4px 20px rgba(244,118,42,0.3);">Go to Login →</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TUTORIAL OVERLAY -->
+<div class="tutorial-overlay" id="tutorialOverlay">
+  <div class="tutorial-card">
+    <div class="tutorial-emoji" id="tutEmoji">🎉</div>
+    <h3 id="tutTitle">Welcome to Minon Solutions!</h3>
+    <p id="tutDesc">You're now part of Nigeria's #1 all-in-one platform. Let's show you around.</p>
+    <div class="tutorial-steps" id="tutDots"></div>
+    <button class="tutorial-btn" onclick="nextTutorial()" id="tutBtn">Let's Go →</button>
+    <span class="tutorial-skip" onclick="skipTutorial()">Skip tutorial</span>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://rmwvrbpkxbxmbpidzbfe.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtd3ZyYnBreGJ4bWJwaWR6YmZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MTE2ODIsImV4cCI6MjA5MjM4NzY4Mn0.aIbszMyL8lAMsF2T4-oSjHbuGr1b5-Az3fI4lGd0aYM';
+let supabase;
+try {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+} catch(e) {
+  console.error('Supabase failed to load:', e);
+  document.getElementById('alertBox').textContent = '⚠️ Connection error. Please check your internet and refresh.';
+  document.getElementById('alertBox').className = 'alert error';
+}
+
+let currentStep = 1;
+let selectedRole = '';
+
+// Theme
+let isDark = localStorage.getItem('minon-theme') === 'dark';
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+}
+applyTheme();
+function toggleTheme() { isDark = !isDark; localStorage.setItem('minon-theme', isDark ? 'dark' : 'light'); applyTheme(); }
+
+function showAlert(msg, type) {
+  const box = document.getElementById('alertBox');
+  box.textContent = msg; box.className = `alert ${type}`;
+  box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function hideAlert() { document.getElementById('alertBox').className = 'alert'; }
+
+// Role selection
+function selectRole(role, el) {
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedRole = role;
+  hideAlert();
+}
+
+// Password strength
+function checkPassword(pw) {
+  const bars = [document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3'), document.getElementById('bar4')];
+  const label = document.getElementById('pwLabel');
+  bars.forEach(b => { b.className = 'pw-bar'; });
+  if (!pw) { label.textContent = 'Enter a password'; return; }
+  let strength = 0;
+  if (pw.length >= 8) strength++;
+  if (/[A-Z]/.test(pw)) strength++;
+  if (/[0-9]/.test(pw)) strength++;
+  if (/[^A-Za-z0-9]/.test(pw)) strength++;
+  const cls = strength <= 1 ? 'weak' : strength <= 2 ? 'medium' : 'strong';
+  const labels = { weak:'Weak', medium:'Medium', strong:'Strong' };
+  for (let i = 0; i < strength; i++) bars[i].className = `pw-bar ${cls}`;
+  label.textContent = labels[cls] + ' password';
+  label.style.color = cls === 'weak' ? 'var(--error)' : cls === 'medium' ? '#F59E0B' : 'var(--success)';
+}
+
+function togglePassword(id, btn) {
+  const input = document.getElementById(id);
+  input.type = input.type === 'password' ? 'text' : 'password';
+  btn.textContent = input.type === 'password' ? '👁️' : '🙈';
+}
+
+// Update step dots
+function updateDots(step) {
+  for (let i = 1; i <= 4; i++) {
+    const dot = document.getElementById(`dot${i}`);
+    dot.className = 'step-dot' + (i < step ? ' done' : i === step ? ' active' : '');
+  }
+}
+
+// Navigate steps
+function goToStep(step) {
+  hideAlert();
+
+  // Validate before moving
+  if (step > currentStep) {
+    if (currentStep === 1) {
+      if (!selectedRole) { showAlert('⚠️ Please select your role to continue.', 'error'); return; }
+    }
+    if (currentStep === 2) {
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm = document.getElementById('confirmPassword').value;
+      if (!firstName || !lastName) { showAlert('⚠️ Please enter your full name.', 'error'); return; }
+      if (!email || !email.includes('@')) { showAlert('⚠️ Please enter a valid email address.', 'error'); return; }
+      if (!phone || phone.length < 10) { showAlert('⚠️ Please enter a valid Nigerian phone number.', 'error'); return; }
+      if (password.length < 8) { showAlert('⚠️ Password must be at least 8 characters.', 'error'); return; }
+      if (password !== confirm) { showAlert('⚠️ Passwords do not match.', 'error'); return; }
+    }
+    if (currentStep === 3) {
+      if (!document.getElementById('termsCheck').checked) {
+        showAlert('⚠️ You must accept the Terms & Conditions to continue.', 'error'); return;
+      }
+      buildSummary();
+    }
+  }
+
+  document.getElementById(`step${currentStep}`).classList.remove('active');
+  currentStep = step;
+  document.getElementById(`step${currentStep}`).classList.add('active');
+  updateDots(currentStep);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Build summary card
+function buildSummary() {
+  const roleLabels = {
+    buyer: 'Buyer / Customer', vendor: 'Vendor', service_provider: 'Service Provider',
+    dispatch_rider: 'Dispatch Rider', tutor: 'Tutor', realtor: 'Realtor',
+    restaurant_owner: 'Restaurant Owner', freelancer: 'Freelancer'
+  };
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName = document.getElementById('lastName').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const ref = document.getElementById('referralCode').value.trim();
+
+  document.getElementById('summaryContent').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span style="color:var(--text-muted);font-size:0.85rem;">Full Name</span>
+        <span style="font-weight:600;font-size:0.9rem;">${firstName} ${lastName}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span style="color:var(--text-muted);font-size:0.85rem;">Email</span>
+        <span style="font-weight:600;font-size:0.9rem;">${email}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span style="color:var(--text-muted);font-size:0.85rem;">Phone</span>
+        <span style="font-weight:600;font-size:0.9rem;">${phone}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span style="color:var(--text-muted);font-size:0.85rem;">Role</span>
+        <span style="font-weight:600;font-size:0.9rem;color:var(--orange);">${roleLabels[selectedRole]}</span>
+      </div>
+      ${ref ? `<div style="display:flex;justify-content:space-between;padding:8px 0;">
+        <span style="color:var(--text-muted);font-size:0.85rem;">Referral Code</span>
+        <span style="font-weight:600;font-size:0.9rem;color:var(--teal);">${ref}</span>
+      </div>` : ''}
+    </div>
+  `;
+}
+
+// Signup handler
+async function handleSignup() {
+  hideAlert();
+  const btn = document.getElementById('submitBtn');
+  const spinner = document.getElementById('submitSpinner');
+  const text = document.getElementById('submitText');
+
+  btn.disabled = true;
+  spinner.style.display = 'block';
+  text.textContent = 'Creating your account...';
+
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName = document.getElementById('lastName').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const password = document.getElementById('password').value;
+  const referralCode = document.getElementById('referralCode').value.trim().toUpperCase();
+
+  try {
+    // Check for referrer
+    let referrerId = null;
+    if (referralCode) {
+      const { data: referrer } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('referral_code', referralCode)
+        .single();
+      if (referrer) referrerId = referrer.id;
+    }
+
+    // Create auth user
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email, password,
+      options: {
+        data: { full_name: `${firstName} ${lastName}`, role: selectedRole }
+      }
+    });
+
+    if (authError) {
+      showAlert('❌ ' + authError.message, 'error');
+      btn.disabled = false; spinner.style.display = 'none';
+      text.textContent = 'Create My Account 🚀'; return;
+    }
+
+    const userId = authData.user.id;
+
+    // Create profile
+    const username = (firstName + lastName).toLowerCase().replace(/\s/g,'') + Math.floor(Math.random()*999);
+    const { error: profileError } = await supabase.from('profiles').insert({
+      id: userId,
+      email,
+      phone,
+      full_name: `${firstName} ${lastName}`,
+      username,
+      role: selectedRole,
+      referred_by: referrerId,
+      terms_accepted: true,
+      terms_accepted_at: new Date().toISOString()
+    });
+
+    if (profileError) {
+      showAlert('❌ Profile creation failed: ' + profileError.message, 'error');
+      btn.disabled = false; spinner.style.display = 'none';
+      text.textContent = 'Create My Account 🚀'; return;
+    }
+
+    // Create referral record
+    if (referrerId) {
+      await supabase.from('referrals').insert({
+        referrer_id: referrerId,
+        referred_id: userId,
+        bonus_amount: 300
+      });
+    }
+
+    // Show success & tutorial
+    showTutorial();
+
+  } catch (err) {
+    showAlert('❌ Something went wrong. Please try again.', 'error');
+    btn.disabled = false; spinner.style.display = 'none';
+    text.textContent = 'Create My Account 🚀';
+  }
+}
+
+// Google signup
+async function signupWithGoogle() {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin + '/auth/callback' }
+  });
+  if (error) showAlert('❌ Google signup failed.', 'error');
+}
+
+// Tutorial
+const tutorials = [
+  { emoji:'🎉', title:'Welcome to Minon Solutions!', desc:"You're now part of Nigeria's #1 all-in-one platform. Let's show you around in 3 quick steps." },
+  { emoji:'📊', title:'Your Dashboard', desc:'Your dashboard is your control centre. Track orders, manage your wallet, see notifications and much more.' },
+  { emoji:'💰', title:'Your Wallet', desc:'Every transaction goes through your Minon Wallet. Earn referral bonuses, vendor payouts, and withdraw when you hit ₦5,000.' },
+  { emoji:'🤖', title:'Meet Minon AI', desc:'Need help? Minon AI is available 24/7 to answer questions, take orders and connect you directly to our team via live chat.' },
+  { emoji:'🚀', title:"You're All Set!", desc:'Head to your dashboard to complete your profile and start exploring. Welcome to the family!' }
+];
+let tutStep = 0;
+
+function showTutorial() {
+  const overlay = document.getElementById('tutorialOverlay');
+  overlay.style.display = 'flex';
+  renderTutorial();
+}
+
+function renderTutorial() {
+  const t = tutorials[tutStep];
+  document.getElementById('tutEmoji').textContent = t.emoji;
+  document.getElementById('tutTitle').textContent = t.title;
+  document.getElementById('tutDesc').textContent = t.desc;
+  document.getElementById('tutBtn').textContent = tutStep < tutorials.length - 1 ? 'Next →' : 'Go to Dashboard →';
+  const dots = document.getElementById('tutDots');
+  dots.innerHTML = tutorials.map((_, i) => `<div class="tutorial-step-dot ${i===tutStep?'active':''}"></div>`).join('');
+}
+
+function nextTutorial() {
+  if (tutStep < tutorials.length - 1) { tutStep++; renderTutorial(); }
+  else skipTutorial();
+}
+
+function skipTutorial() {
+  document.getElementById('tutorialOverlay').style.display = 'none';
+  const role = selectedRole || 'buyer';
+  const routes = {
+    admin: '/admin',
+    vendor: '/vendor',
+    service_provider: '/provider',
+    dispatch_rider: '/rider',
+    tutor: '/tutor',
+    realtor: '/realtor',
+    restaurant_owner: '/restaurant',
+    freelancer: '/freelancer',
+    buyer: '/buyer'
+  };
+  window.location.href = routes[role] || '/buyer';
+}
+
+// Auto-uppercase referral code
+document.getElementById('referralCode').addEventListener('input', function() {
+  this.value = this.value.toUpperCase();
+});
+</script>
+</body>
+</html>

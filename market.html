@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minon Market — Buy & Sell Anything in Nigeria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Bricolage+Grotesque:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--navy:#0D1B3E;--teal:#2EC4B6;--orange:#F4762A;--purple:#6366f1;--bg:#F8F5FF;--bg-card:#FFFFFF;--text-primary:#0D1B3E;--text-secondary:#4A5568;--text-muted:#8896AB;--border:rgba(13,27,62,0.1);--shadow:0 4px 24px rgba(13,27,62,0.08);--shadow-lg:0 20px 60px rgba(13,27,62,0.14);--success:#10B981;--error:#EF4444;}
+[data-theme="dark"]{--bg:#070E1F;--bg-card:#0F1A35;--text-primary:#F0F4FF;--text-secondary:#A8B8D8;--text-muted:#5A7090;--border:rgba(255,255,255,0.07);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text-primary);transition:background 0.3s,color 0.3s;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,27,62,0.97);backdrop-filter:blur(16px);height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 5%;}
+.nav-logo-text{font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;}
+.nav-logo-text span{color:var(--purple);}
+.nav-links{display:flex;align-items:center;gap:1.5rem;}
+.nav-links a{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.875rem;font-weight:500;transition:color 0.2s;}
+.nav-links a:hover{color:#fff;}
+.nav-cta{background:var(--purple)!important;color:#fff!important;padding:7px 18px;border-radius:20px;font-weight:700!important;}
+.hero{min-height:100vh;background:linear-gradient(135deg,#0D1B3E 0%,#1a0a3a 60%,#0d0a2a 100%);display:flex;align-items:center;padding:100px 5% 60px;position:relative;overflow:hidden;}
+.hero-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.2;}
+.orb1{width:500px;height:500px;background:var(--purple);top:-150px;right:-100px;}
+.orb2{width:350px;height:350px;background:var(--orange);bottom:-80px;left:5%;}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:60px 60px;}
+.hero-content{position:relative;z-index:2;max-width:650px;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:#818cf8;padding:6px 16px;border-radius:30px;font-size:0.78rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.5rem;}
+.hero-title{font-family:'Clash Display',sans-serif;font-size:clamp(3rem,5.5vw,4.8rem);font-weight:700;color:#fff;line-height:1.05;margin-bottom:1.5rem;}
+.hero-title span{color:#818cf8;}
+.hero-desc{color:rgba(255,255,255,0.65);font-size:1.1rem;line-height:1.75;margin-bottom:2.5rem;max-width:520px;}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--purple);color:#fff;padding:14px 28px;border-radius:50px;font-weight:700;font-size:1rem;text-decoration:none;border:none;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;box-shadow:0 8px 30px rgba(99,102,241,0.35);transition:transform 0.2s,box-shadow 0.2s;}
+.btn-primary:hover{transform:translateY(-2px);}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.08);color:#fff;padding:14px 28px;border-radius:50px;font-weight:600;font-size:1rem;text-decoration:none;border:1.5px solid rgba(255,255,255,0.2);cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;transition:all 0.2s;}
+.btn-ghost:hover{background:rgba(255,255,255,0.14);}
+.hero-stats{display:flex;gap:2.5rem;margin-top:3.5rem;padding-top:2.5rem;border-top:1px solid rgba(255,255,255,0.1);flex-wrap:wrap;}
+.hero-stat-num{font-family:'Clash Display',sans-serif;font-size:2rem;font-weight:700;color:#fff;}
+.hero-stat-num span{color:#818cf8;}
+.hero-stat-label{font-size:0.78rem;color:rgba(255,255,255,0.45);margin-top:2px;}
+section{padding:90px 5%;}
+.section-inner{max-width:1200px;margin:0 auto;}
+.eyebrow{display:inline-block;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);color:var(--purple);font-size:0.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:1rem;}
+.section-title{font-family:'Clash Display',sans-serif;font-size:clamp(2rem,3.5vw,3rem);font-weight:700;color:var(--text-primary);line-height:1.1;margin-bottom:1rem;}
+.section-desc{color:var(--text-muted);font-size:1rem;line-height:1.75;max-width:540px;margin-bottom:3rem;}
+
+/* SEARCH */
+.search-section{background:var(--bg-card);border-bottom:1px solid var(--border);padding:40px 5%;}
+.search-wrap{max-width:700px;margin:0 auto;text-align:center;}
+.search-bar{display:flex;gap:12px;background:var(--bg);border:2px solid var(--border);border-radius:50px;padding:8px 8px 8px 20px;align-items:center;transition:border-color 0.2s;}
+.search-bar:focus-within{border-color:var(--purple);}
+.search-bar input{flex:1;border:none;outline:none;background:transparent;font-family:'Bricolage Grotesque',sans-serif;font-size:0.95rem;color:var(--text-primary);}
+.search-bar input::placeholder{color:var(--text-muted);}
+.search-btn{background:var(--purple);color:#fff;border:none;border-radius:50px;padding:10px 24px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.875rem;font-weight:700;cursor:pointer;transition:background 0.2s;}
+.search-btn:hover{background:#4f46e5;}
+.category-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px;}
+.chip{background:var(--bg);border:1.5px solid var(--border);color:var(--text-secondary);padding:6px 16px;border-radius:20px;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.chip:hover,.chip.active{background:var(--purple);border-color:var(--purple);color:#fff;}
+
+/* PRODUCTS */
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px;}
+.product-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:18px;overflow:hidden;transition:transform 0.25s,box-shadow 0.25s,border-color 0.25s;cursor:pointer;}
+.product-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg);border-color:var(--purple);}
+.product-img{width:100%;height:180px;object-fit:cover;background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(244,118,42,0.08));display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative;}
+.product-featured{position:absolute;top:10px;left:10px;background:var(--orange);color:#fff;font-size:0.68rem;font-weight:700;padding:3px 10px;border-radius:20px;}
+.product-body{padding:14px;}
+.product-name{font-weight:700;font-size:0.92rem;color:var(--text-primary);margin-bottom:4px;}
+.product-category{font-size:0.72rem;color:var(--purple);font-weight:600;margin-bottom:8px;}
+.product-price{font-family:'Clash Display',sans-serif;font-size:1.2rem;font-weight:700;color:var(--orange);}
+.product-meta{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+.product-location{font-size:0.72rem;color:var(--text-muted);}
+.product-negotiable{font-size:0.7rem;font-weight:600;color:var(--teal);}
+.product-actions{display:flex;gap:8px;margin-top:10px;}
+.add-to-wishlist{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:0.75rem;font-weight:700;cursor:pointer;color:var(--text-muted);transition:all 0.2s;}
+.add-to-wishlist:hover{border-color:var(--purple);color:var(--purple);}
+.contact-vendor{background:var(--purple);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;flex:1;transition:background 0.2s;}
+.contact-vendor:hover{background:#4f46e5;}
+
+/* CATEGORIES */
+.cats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;}
+.cat-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:16px;padding:20px;text-align:center;cursor:pointer;transition:all 0.2s;}
+.cat-card:hover{border-color:var(--purple);transform:translateY(-3px);}
+.cat-icon{font-size:2rem;margin-bottom:8px;}
+.cat-name{font-size:0.82rem;font-weight:700;color:var(--text-primary);}
+.cat-count{font-size:0.7rem;color:var(--text-muted);margin-top:2px;}
+
+/* VENDOR CTA */
+.vendor-cta{background:linear-gradient(135deg,#1a0a3a,#0d0a2a);border-radius:24px;padding:3rem;text-align:center;margin-top:3rem;}
+.vendor-cta h3{font-family:'Clash Display',sans-serif;font-size:1.8rem;font-weight:700;color:#fff;margin-bottom:1rem;}
+.vendor-cta p{color:rgba(255,255,255,0.6);font-size:0.95rem;margin-bottom:2rem;}
+
+/* HOW IT WORKS */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;position:relative;}
+.steps::before{content:'';position:absolute;top:36px;left:12%;right:12%;height:2px;background:linear-gradient(90deg,var(--purple),var(--orange));}
+.step{text-align:center;position:relative;z-index:1;}
+.step-num{width:72px;height:72px;border-radius:50%;background:var(--bg-card);border:3px solid var(--purple);display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-size:1.3rem;font-weight:700;color:var(--purple);margin:0 auto 1.2rem;box-shadow:0 0 0 6px rgba(99,102,241,0.08);}
+.step h4{font-family:'Clash Display',sans-serif;font-size:0.95rem;font-weight:700;color:var(--text-primary);margin-bottom:0.5rem;}
+.step p{font-size:0.82rem;color:var(--text-muted);line-height:1.6;}
+
+.cta-section{background:linear-gradient(135deg,var(--navy),#1a0a3a);padding:90px 5%;text-align:center;}
+.cta-section h2{font-family:'Clash Display',sans-serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:700;color:#fff;margin-bottom:1rem;}
+.cta-section p{color:rgba(255,255,255,0.6);font-size:1rem;margin-bottom:2.5rem;}
+footer{background:#050D1F;color:rgba(255,255,255,0.5);text-align:center;padding:2rem 5%;font-size:0.85rem;}
+footer strong{color:var(--purple);}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.loading{text-align:center;padding:3rem;color:var(--text-muted);}
+.empty-products{text-align:center;padding:3rem;color:var(--text-muted);}
+.empty-products-icon{font-size:3rem;margin-bottom:1rem;opacity:0.4;}
+@media(max-width:1024px){.steps{grid-template-columns:repeat(2,1fr);}.steps::before{display:none;}}
+@media(max-width:768px){.nav-links{display:none;}.hero-title{font-size:2.8rem;}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-logo-text">Min<span>o</span>n Market</div>
+  <div class="nav-links">
+    <a href="/">← Home</a>
+    <a href="#categories">Categories</a>
+    <a href="#products">Products</a>
+    <a href="/signup">Sell on Minon</a>
+    <a href="/signup" class="nav-cta">Get Started</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-orb orb1"></div><div class="hero-orb orb2"></div><div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">🛒 Minon Market</div>
+    <h1 class="hero-title">Buy & Sell<br><span>Anything</span> in Nigeria</h1>
+    <p class="hero-desc">Nigeria's trusted marketplace connecting verified buyers and sellers. Electronics, fashion, food, agriculture, property and more — all in one place.</p>
+    <div class="hero-actions">
+      <a href="#products" class="btn-primary">🛒 Browse Products</a>
+      <a href="/signup" class="btn-ghost">Start Selling →</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hero-stat-num">✅</div><div class="hero-stat-label">Verified Vendors</div></div>
+      <div><div class="hero-stat-num">2<span>wks</span></div><div class="hero-stat-label">Max Delivery</div></div>
+      <div><div class="hero-stat-num">🇳🇬</div><div class="hero-stat-label">Nationwide</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<div class="search-section">
+  <div class="search-wrap">
+    <div class="search-bar">
+      <span>🔍</span>
+      <input type="text" id="searchInput" placeholder="Search products, vendors, categories..." onkeypress="if(event.key==='Enter')searchProducts()">
+      <button class="search-btn" onclick="searchProducts()">Search</button>
+    </div>
+    <div class="category-chips" id="categoryChips">
+      <span class="chip active" onclick="filterCategory('',this)">All</span>
+      <span class="chip" onclick="filterCategory('Electronics',this)">📱 Electronics</span>
+      <span class="chip" onclick="filterCategory('Fashion & Clothing',this)">👗 Fashion</span>
+      <span class="chip" onclick="filterCategory('Food & Groceries',this)">🛒 Food</span>
+      <span class="chip" onclick="filterCategory('Home & Office',this)">🏠 Home</span>
+      <span class="chip" onclick="filterCategory('Beauty & Health',this)">💄 Beauty</span>
+      <span class="chip" onclick="filterCategory('Agriculture',this)">🌾 Agriculture</span>
+      <span class="chip" onclick="filterCategory('Automobiles',this)">🚗 Autos</span>
+    </div>
+  </div>
+</div>
+
+<!-- CATEGORIES -->
+<section id="categories" style="padding-bottom:40px;">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="eyebrow">Browse by Category</div>
+      <h2 class="section-title">Shop Everything</h2>
+    </div>
+    <div class="cats-grid">
+      <div class="cat-card reveal" onclick="filterCategory('Electronics',null)"><div class="cat-icon">📱</div><div class="cat-name">Electronics</div></div>
+      <div class="cat-card reveal" onclick="filterCategory('Fashion & Clothing',null)"><div class="cat-icon">👗</div><div class="cat-name">Fashion</div></div>
+      <div class="cat-card reveal" onclick="filterCategory('Food & Groceries',null)"><div class="cat-icon">🛒</div><div class="cat-name">Food & Groceries</div></div>
+      <div class="cat-card reveal" onclick="filterCategory('Home & Office',null)"><div class="cat-icon">🏠</div><div class="cat-name">Home & Office</div></div>
+      <div class="cat-card reveal" onclick="filterCategory('Beauty & Health',null)"><div class="cat-icon">💄</div><div class="cat-name">Beauty & Health</div></div>
+      <div class="cat-card reveal" onclick="filterCategory('Agriculture',null)"><div class="cat-icon">🌾</div><div class="cat-name">Agriculture</div></div>
+      <div class="cat-card reveal" onclick="filterCategory('Automobiles',null)"><div class="cat-icon">🚗</div><div class="cat-name">Automobiles</div></div>
+      <div class="cat-card reveal" onclick="filterCategory('Books & Education',null)"><div class="cat-icon">📚</div><div class="cat-name">Books</div></div>
+      <div class="cat-card reveal" onclick="filterCategory('Sports & Fitness',null)"><div class="cat-icon">⚽</div><div class="cat-name">Sports</div></div>
+      <div class="cat-card reveal" onclick="filterCategory('Baby & Kids',null)"><div class="cat-icon">👶</div><div class="cat-name">Baby & Kids</div></div>
+      <div class="cat-card reveal" onclick="filterCategory('Furniture',null)"><div class="cat-icon">🛋️</div><div class="cat-name">Furniture</div></div>
+      <div class="cat-card reveal" onclick="filterCategory('',null)"><div class="cat-icon">📦</div><div class="cat-name">All Products</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section id="products" style="padding-top:40px;background:var(--bg-card);border-top:1px solid var(--border);">
+  <div class="section-inner">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;" class="reveal">
+      <div>
+        <div class="eyebrow">Live Listings</div>
+        <h2 class="section-title" style="margin-bottom:0;">Products for Sale</h2>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <select id="sortSelect" onchange="loadProducts()" style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:8px 14px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.85rem;color:var(--text-primary);outline:none;">
+          <option value="latest">Latest First</option>
+          <option value="price_low">Price: Low to High</option>
+          <option value="price_high">Price: High to Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="products-grid" id="productsGrid">
+      <div class="loading" style="grid-column:1/-1;">Loading products... 🛒</div>
+    </div>
+    <div style="text-align:center;margin-top:2.5rem;" id="loadMoreWrap" style="display:none;">
+      <button onclick="loadMore()" style="background:var(--purple);color:#fff;border:none;border-radius:50px;padding:12px 32px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;">Load More Products</button>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center;margin-bottom:3rem;">
+      <div class="eyebrow">How It Works</div>
+      <h2 class="section-title">Buy & Sell in 4 Steps</h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><div class="step-num">01</div><h4>Browse & Discover</h4><p>Search thousands of verified products across all categories.</p></div>
+      <div class="step reveal"><div class="step-num">02</div><h4>Contact Vendor</h4><p>Message the vendor directly or order through the platform.</p></div>
+      <div class="step reveal"><div class="step-num">03</div><h4>Pay Securely</h4><p>Transfer to Moniepoint, upload receipt. Admin verifies payment.</p></div>
+      <div class="step reveal"><div class="step-num">04</div><h4>Receive Delivery</h4><p>Vendor ships via Minon Logistics. Track status in your dashboard.</p></div>
+    </div>
+
+    <!-- VENDOR CTA -->
+    <div class="vendor-cta reveal">
+      <h3>Start Selling on Minon Market</h3>
+      <p>Join thousands of verified vendors. List your products, reach buyers nationwide and grow your business. Pay just ₦1,000 verification fee.</p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <a href="/signup" class="btn-primary">🏪 Start Selling Today</a>
+        <a href="https://wa.me/2348118007861" target="_blank" class="btn-ghost">💬 Ask Us Anything</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="section-inner">
+    <h2 class="reveal">Nigeria's Trusted Marketplace</h2>
+    <p class="reveal">Verified vendors. Secure payments. Nationwide delivery.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;" class="reveal">
+      <a href="/signup" class="btn-primary">🛒 Start Shopping</a>
+      <a href="https://wa.me/2348118007861" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;padding:14px 28px;border-radius:50px;font-weight:700;font-size:1rem;text-decoration:none;box-shadow:0 8px 30px rgba(37,211,102,0.3);">💬 WhatsApp Us</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 <strong>Minon Market</strong> — A Branch of Minon Solutions · RC 8965878 · Awka, Anambra State</p>
+  <p style="margin-top:6px;"><a href="/" style="color:#818cf8;text-decoration:none;">← Back to Minon Solutions</a></p>
+</footer>
+
+<script>
+const SUPABASE_URL='https://rmwvrbpkxbxmbpidzbfe.supabase.co';
+const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtd3ZyYnBreGJ4bWJwaWR6YmZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MTE2ODIsImV4cCI6MjA5MjM4NzY4Mn0.aIbszMyL8lAMsF2T4-oSjHbuGr1b5-Az3fI4lGd0aYM';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+let currentCategory='';let currentSearch='';let offset=0;const LIMIT=12;
+
+const reveals=document.querySelectorAll('.reveal');
+const observer=new IntersectionObserver((entries)=>{entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('visible'),i*80);observer.unobserve(e.target);}});},{threshold:0.1});
+reveals.forEach(el=>observer.observe(el));
+
+async function loadProducts(reset=true){
+  if(reset)offset=0;
+  const grid=document.getElementById('productsGrid');
+  if(reset)grid.innerHTML='<div class="loading" style="grid-column:1/-1;">Loading products... 🛒</div>';
+  const sort=document.getElementById('sortSelect').value;
+  let q=sb.from('products').select('*').eq('is_available',true).range(offset,offset+LIMIT-1);
+  if(currentCategory)q=q.eq('category',currentCategory);
+  if(currentSearch)q=q.ilike('title',`%${currentSearch}%`);
+  if(sort==='price_low')q=q.order('price',{ascending:true});
+  else if(sort==='price_high')q=q.order('price',{ascending:false});
+  else q=q.order('created_at',{ascending:false});
+  const{data,error}=await q;
+  if(reset)grid.innerHTML='';
+  if(!data?.length&&reset){
+    grid.innerHTML=`<div class="empty-products" style="grid-column:1/-1;"><div class="empty-products-icon">🛒</div><p>No products found. <a href="/signup" style="color:var(--purple);font-weight:700;">Be the first to sell!</a></p></div>`;
+    return;
+  }
+  if(data?.length)data.forEach(p=>grid.innerHTML+=productCard(p));
+  document.getElementById('loadMoreWrap').style.display=data?.length===LIMIT?'block':'none';
+  offset+=LIMIT;
+}
+
+function productCard(p){
+  const img=p.media_urls?.length?`<img src="${p.media_urls[0]}" style="width:100%;height:100%;object-fit:cover;">`:'🛍️';
+  return`<div class="product-card">
+    <div class="product-img">${img}${p.is_featured?'<div class="product-featured">⭐ Featured</div>':''}</div>
+    <div class="product-body">
+      <div class="product-name">${p.title}</div>
+      <div class="product-category">${p.category||'—'}</div>
+      <div class="product-price">₦${fmt(p.price)}</div>
+      <div class="product-meta">
+        <div class="product-location">📍 ${p.location||'Nigeria'}</div>
+        ${p.negotiable?'<div class="product-negotiable">Negotiable</div>':''}
+      </div>
+      <div class="product-actions">
+        <button class="add-to-wishlist" onclick="addWishlist('${p.id}')">♡ Save</button>
+        <button class="contact-vendor" onclick="window.location.href='/signup'">Order Now</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function filterCategory(cat,el){
+  currentCategory=cat;offset=0;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  if(el)el.classList.add('active');
+  loadProducts();
+}
+
+function searchProducts(){
+  currentSearch=document.getElementById('searchInput').value.trim();
+  loadProducts();
+}
+
+function loadMore(){loadProducts(false);}
+
+async function addWishlist(id){
+  const{data:{session}}=await sb.auth.getSession();
+  if(!session){window.location.href='/login';return;}
+  await sb.from('wishlists').upsert({user_id:session.user.id,listing_id:id,listing_type:'product'});
+  alert('Added to wishlist! ❤️');
+}
+
+function fmt(n){return Number(n||0).toLocaleString('en-NG');}
+window.addEventListener('DOMContentLoaded',loadProducts);
+</script>
+</body>
+</html>

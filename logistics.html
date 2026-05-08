@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minon Logistics — Nationwide Delivery Services</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Bricolage+Grotesque:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --navy:#0D1B3E;--teal:#2EC4B6;--orange:#F4762A;
+  --bg:#F0F9FF;--bg-card:#FFFFFF;
+  --text-primary:#0D1B3E;--text-secondary:#4A5568;--text-muted:#8896AB;
+  --border:rgba(13,27,62,0.1);--shadow:0 4px 24px rgba(13,27,62,0.08);
+  --shadow-lg:0 20px 60px rgba(13,27,62,0.14);
+  --success:#10B981;--error:#EF4444;
+}
+[data-theme="dark"]{
+  --bg:#070E1F;--bg-card:#0F1A35;
+  --text-primary:#F0F4FF;--text-secondary:#A8B8D8;--text-muted:#5A7090;
+  --border:rgba(255,255,255,0.07);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text-primary);transition:background 0.3s,color 0.3s;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,27,62,0.96);backdrop-filter:blur(16px);height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 5%;}
+.nav-logo-text{font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;}
+.nav-logo-text span{color:var(--teal);}
+.nav-links{display:flex;align-items:center;gap:1.5rem;}
+.nav-links a{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.875rem;font-weight:500;transition:color 0.2s;}
+.nav-links a:hover{color:#fff;}
+.nav-cta{background:var(--teal)!important;color:var(--navy)!important;padding:7px 18px;border-radius:20px;font-weight:700!important;}
+
+.hero{min-height:100vh;background:linear-gradient(135deg,#0D1B3E 0%,#0a2a1f 60%,#0a3a2a 100%);display:flex;align-items:center;padding:100px 5% 60px;position:relative;overflow:hidden;}
+.hero-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.2;}
+.orb1{width:500px;height:500px;background:var(--teal);top:-150px;right:-100px;}
+.orb2{width:350px;height:350px;background:var(--orange);bottom:-80px;left:5%;}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:60px 60px;}
+.hero-content{position:relative;z-index:2;max-width:650px;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(46,196,182,0.15);border:1px solid rgba(46,196,182,0.3);color:var(--teal);padding:6px 16px;border-radius:30px;font-size:0.78rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.5rem;}
+.hero-title{font-family:'Clash Display',sans-serif;font-size:clamp(3rem,5.5vw,4.8rem);font-weight:700;color:#fff;line-height:1.05;margin-bottom:1.5rem;}
+.hero-title span{color:var(--teal);}
+.hero-desc{color:rgba(255,255,255,0.65);font-size:1.1rem;line-height:1.75;margin-bottom:2.5rem;max-width:520px;}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--teal);color:var(--navy);padding:14px 28px;border-radius:50px;font-weight:700;font-size:1rem;text-decoration:none;border:none;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;box-shadow:0 8px 30px rgba(46,196,182,0.35);transition:transform 0.2s,box-shadow 0.2s;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(46,196,182,0.45);}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.08);color:#fff;padding:14px 28px;border-radius:50px;font-weight:600;font-size:1rem;text-decoration:none;border:1.5px solid rgba(255,255,255,0.2);cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;transition:all 0.2s;}
+.btn-ghost:hover{background:rgba(255,255,255,0.14);}
+.hero-stats{display:flex;gap:2.5rem;margin-top:3.5rem;padding-top:2.5rem;border-top:1px solid rgba(255,255,255,0.1);flex-wrap:wrap;}
+.hero-stat-num{font-family:'Clash Display',sans-serif;font-size:2rem;font-weight:700;color:#fff;}
+.hero-stat-num span{color:var(--teal);}
+.hero-stat-label{font-size:0.78rem;color:rgba(255,255,255,0.45);margin-top:2px;}
+
+section{padding:90px 5%;}
+.section-inner{max-width:1200px;margin:0 auto;}
+.eyebrow{display:inline-block;background:rgba(46,196,182,0.1);border:1px solid rgba(46,196,182,0.2);color:var(--teal);font-size:0.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:1rem;}
+.section-title{font-family:'Clash Display',sans-serif;font-size:clamp(2rem,3.5vw,3rem);font-weight:700;color:var(--text-primary);line-height:1.1;margin-bottom:1rem;}
+.section-desc{color:var(--text-muted);font-size:1rem;line-height:1.75;max-width:540px;margin-bottom:3rem;}
+
+/* HOW IT WORKS */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;position:relative;}
+.steps::before{content:'';position:absolute;top:36px;left:12%;right:12%;height:2px;background:linear-gradient(90deg,var(--teal),var(--orange));}
+.step{text-align:center;position:relative;z-index:1;}
+.step-num{width:72px;height:72px;border-radius:50%;background:var(--bg-card);border:3px solid var(--teal);display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-size:1.3rem;font-weight:700;color:var(--teal);margin:0 auto 1.2rem;box-shadow:0 0 0 6px rgba(46,196,182,0.08);}
+.step h4{font-family:'Clash Display',sans-serif;font-size:0.95rem;font-weight:700;color:var(--text-primary);margin-bottom:0.5rem;}
+.step p{font-size:0.82rem;color:var(--text-muted);line-height:1.6;}
+
+/* SERVICE CARDS */
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+.service-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:20px;padding:2rem;transition:transform 0.3s,box-shadow 0.3s,border-color 0.3s;position:relative;overflow:hidden;}
+.service-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--orange));transform:scaleX(0);transform-origin:left;transition:transform 0.3s;}
+.service-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);border-color:transparent;}
+.service-card:hover::before{transform:scaleX(1);}
+.service-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin-bottom:1.2rem;}
+.service-card h3{font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:0.5rem;}
+.service-card p{color:var(--text-muted);font-size:0.88rem;line-height:1.65;}
+
+/* WHY US */
+.why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;}
+.why-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:16px;padding:1.8rem;text-align:center;transition:border-color 0.2s,transform 0.2s;}
+.why-card:hover{border-color:var(--teal);transform:translateY(-3px);}
+.why-icon{font-size:2.2rem;margin-bottom:1rem;}
+.why-card h4{font-family:'Clash Display',sans-serif;font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:0.5rem;}
+.why-card p{color:var(--text-muted);font-size:0.83rem;line-height:1.6;}
+
+/* COVERAGE */
+.coverage-section{background:linear-gradient(135deg,var(--navy) 0%,#0a2a1f 100%);padding:90px 5%;}
+.coverage-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;max-width:1200px;margin:0 auto;}
+.coverage-states{display:flex;flex-wrap:wrap;gap:8px;margin-top:1.5rem;}
+.state-tag{background:rgba(46,196,182,0.12);border:1px solid rgba(46,196,182,0.25);color:var(--teal);padding:5px 14px;border-radius:20px;font-size:0.78rem;font-weight:600;}
+.coverage-info h3{font-family:'Clash Display',sans-serif;font-size:1rem;font-weight:700;color:rgba(255,255,255,0.85);margin-bottom:0.5rem;}
+.coverage-info p{font-size:0.85rem;color:rgba(255,255,255,0.55);line-height:1.7;margin-bottom:1.5rem;}
+.delivery-timeline{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px;}
+.timeline-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+.timeline-item:last-child{border-bottom:none;}
+.timeline-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.timeline-label{font-size:0.85rem;color:rgba(255,255,255,0.7);flex:1;}
+.timeline-time{font-size:0.82rem;font-weight:700;color:var(--teal);}
+
+/* BOOKING */
+.booking-section{background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.booking-wrap{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start;max-width:1200px;margin:0 auto;padding:90px 0;}
+.booking-form{background:var(--bg);border-radius:20px;padding:2.5rem;border:1.5px solid var(--border);}
+.form-group{margin-bottom:1.1rem;}
+.form-label{display:block;font-size:0.78rem;font-weight:700;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;}
+.form-input{width:100%;background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.9rem;color:var(--text-primary);outline:none;transition:border-color 0.2s;}
+.form-input:focus{border-color:var(--teal);}
+.form-input::placeholder{color:var(--text-muted);}
+textarea.form-input{resize:vertical;}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.submit-btn{width:100%;background:var(--teal);color:var(--navy);border:none;border-radius:12px;padding:14px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s;margin-top:8px;}
+.submit-btn:hover{background:#1da89c;transform:translateY(-1px);}
+.submit-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+
+/* RIDER CTA */
+.rider-cta{background:linear-gradient(135deg,rgba(46,196,182,0.08),rgba(244,118,42,0.05));border:1.5px solid rgba(46,196,182,0.2);border-radius:20px;padding:2.5rem;text-align:center;margin-top:2rem;}
+.rider-cta h3{font-family:'Clash Display',sans-serif;font-size:1.4rem;font-weight:700;color:var(--text-primary);margin-bottom:0.8rem;}
+.rider-cta p{color:var(--text-muted);font-size:0.9rem;margin-bottom:1.5rem;}
+
+.cta-section{background:linear-gradient(135deg,var(--navy),#0a2a1f);padding:90px 5%;text-align:center;}
+.cta-section h2{font-family:'Clash Display',sans-serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:700;color:#fff;margin-bottom:1rem;}
+.cta-section p{color:rgba(255,255,255,0.6);font-size:1rem;margin-bottom:2.5rem;}
+
+footer{background:#050D1F;color:rgba(255,255,255,0.5);text-align:center;padding:2rem 5%;font-size:0.85rem;}
+footer strong{color:var(--teal);}
+
+.alert{border-radius:10px;padding:12px 16px;font-size:0.85rem;margin-top:1rem;display:none;}
+.alert.success{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:var(--success);display:block;}
+.alert.error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:var(--error);display:block;}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+@media(max-width:1024px){.services-grid{grid-template-columns:repeat(2,1fr);}.why-grid{grid-template-columns:repeat(2,1fr);}.booking-wrap{grid-template-columns:1fr;}.coverage-grid{grid-template-columns:1fr;}.steps{grid-template-columns:repeat(2,1fr);}.steps::before{display:none;}}
+@media(max-width:768px){.nav-links{display:none;}.services-grid{grid-template-columns:1fr;}.why-grid{grid-template-columns:1fr 1fr;}.hero-title{font-size:2.8rem;}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo-text">Min<span>o</span>n Logistics</div>
+  <div class="nav-links">
+    <a href="/">← Back to Home</a>
+    <a href="#services">Services</a>
+    <a href="#coverage">Coverage</a>
+    <a href="#book">Book Delivery</a>
+    <a href="/signup" class="nav-cta">Get Started</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-orb orb1"></div>
+  <div class="hero-orb orb2"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">🚚 Minon Logistics</div>
+    <h1 class="hero-title">Fast, Reliable<br>Delivery <span>Nationwide</span></h1>
+    <p class="hero-desc">From packages to food, errands to bulk shipments — Minon Logistics connects you to trusted dispatch riders across Nigeria. Quote-based pricing, max 2 weeks delivery.</p>
+    <div class="hero-actions">
+      <a href="#book" class="btn-primary">📦 Book a Delivery</a>
+      <a href="#services" class="btn-ghost">Our Services →</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hero-stat-num">🇳🇬</div><div class="hero-stat-label">Nationwide Delivery</div></div>
+      <div><div class="hero-stat-num">2<span>wks</span></div><div class="hero-stat-label">Max Delivery Time</div></div>
+      <div><div class="hero-stat-num">24<span>/7</span></div><div class="hero-stat-label">Always Available</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section style="background:var(--bg-card);border-bottom:1px solid var(--border);">
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center;margin-bottom:3rem;">
+      <div class="eyebrow">How It Works</div>
+      <h2 class="section-title">Delivery in 4 Simple Steps</h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><div class="step-num">01</div><h4>Place Your Request</h4><p>Fill our delivery form with pickup and drop-off details, package description and preferred time.</p></div>
+      <div class="step reveal"><div class="step-num">02</div><h4>Get a Quote</h4><p>Our team reviews your request and sends you a price quote based on distance and package size.</p></div>
+      <div class="step reveal"><div class="step-num">03</div><h4>Pay & Confirm</h4><p>Transfer to our Moniepoint account, upload your receipt. Payment verified and rider assigned.</p></div>
+      <div class="step reveal"><div class="step-num">04</div><h4>Track & Receive</h4><p>Your rider picks up, heads to destination. Track status updates in your dashboard until delivered.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="eyebrow">Our Services</div>
+      <h2 class="section-title">What We Deliver</h2>
+      <p class="section-desc">From small parcels to large packages, we handle it all with speed and care.</p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="service-icon" style="background:rgba(46,196,182,0.1);">📦</div>
+        <h3>Package Delivery</h3>
+        <p>Send any package safely to any destination in Nigeria. Documents, goods, personal items — all handled with care by verified riders.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon" style="background:rgba(244,118,42,0.1);">🍽️</div>
+        <h3>Food Delivery</h3>
+        <p>Hot food delivered fast. Partner restaurants and home cooks connected directly to hungry customers. Fresh, fast, reliable.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon" style="background:rgba(16,185,129,0.1);">🏃</div>
+        <h3>Errand Services</h3>
+        <p>Need something picked up, dropped off or handled? Our riders run errands so you don't have to — market runs, pharmacy, payments and more.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon" style="background:rgba(99,102,241,0.1);">🏢</div>
+        <h3>Business Deliveries</h3>
+        <p>Regular delivery solutions for businesses — ecommerce fulfillment, supplier pickups, daily dispatch and bulk deliveries across Nigeria.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon" style="background:rgba(245,158,11,0.1);">🚨</div>
+        <h3>Express / Urgent Delivery</h3>
+        <p>Need it there fast? Request urgent delivery for time-sensitive items. Priority riders, priority handling, priority delivery.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon" style="background:rgba(46,196,182,0.1);">🌍</div>
+        <h3>Interstate Delivery</h3>
+        <p>Sending to another state? We cover all 36 states and FCT. Secure packaging, real-time updates and maximum 2 weeks delivery guarantee.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section style="background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center;margin-bottom:3rem;">
+      <div class="eyebrow">Why Minon Logistics</div>
+      <h2 class="section-title">Built for Nigerian Delivery</h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-card reveal"><div class="why-icon">✅</div><h4>Verified Riders</h4><p>All dispatch riders are verified, tracked and rated by customers for your safety.</p></div>
+      <div class="why-card reveal"><div class="why-icon">💰</div><h4>Quote-Based Pricing</h4><p>No hidden fees. Get a clear quote before confirming. You pay what you agree to.</p></div>
+      <div class="why-card reveal"><div class="why-icon">📱</div><h4>Real-Time Tracking</h4><p>Track your delivery status from pickup to drop-off right in your dashboard.</p></div>
+      <div class="why-card reveal"><div class="why-icon">🇳🇬</div><h4>Nationwide Coverage</h4><p>We deliver to all 36 states and FCT. Based in Awka, serving all of Nigeria.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- COVERAGE -->
+<section class="coverage-section" id="coverage">
+  <div class="coverage-grid">
+    <div class="reveal">
+      <div class="eyebrow" style="background:rgba(46,196,182,0.15);border-color:rgba(46,196,182,0.3);">Delivery Coverage</div>
+      <h2 class="section-title" style="color:#fff;">We Deliver<br>Everywhere in Nigeria</h2>
+      <p style="color:rgba(255,255,255,0.55);font-size:1rem;line-height:1.75;margin-bottom:1.5rem;">From Awka to Lagos, Abuja to Port Harcourt — Minon Logistics covers all 36 states and the Federal Capital Territory.</p>
+      <div class="coverage-states">
+        <span class="state-tag">Lagos</span><span class="state-tag">Abuja (FCT)</span><span class="state-tag">Anambra</span>
+        <span class="state-tag">Rivers</span><span class="state-tag">Enugu</span><span class="state-tag">Delta</span>
+        <span class="state-tag">Kano</span><span class="state-tag">Kaduna</span><span class="state-tag">Oyo</span>
+        <span class="state-tag">Imo</span><span class="state-tag">Abia</span><span class="state-tag">Cross River</span>
+        <span class="state-tag">Edo</span><span class="state-tag">Bayelsa</span><span class="state-tag">Akwa Ibom</span>
+        <span class="state-tag">+ All 36 States</span>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="coverage-info">
+        <h3>📍 Base Location</h3>
+        <p>Awka, Anambra State — serving customers and riders across the entire country.</p>
+        <h3>⏱️ Delivery Timeline</h3>
+        <p>All deliveries are fulfilled within the agreed timeframe, maximum 2 weeks.</p>
+      </div>
+      <div class="delivery-timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:var(--teal);"></div>
+          <span class="timeline-label">Awka & environs</span>
+          <span class="timeline-time">Same day</span>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:var(--orange);"></div>
+          <span class="timeline-label">Within Anambra State</span>
+          <span class="timeline-time">1–2 days</span>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:#6366f1;"></div>
+          <span class="timeline-label">South-East States</span>
+          <span class="timeline-time">2–5 days</span>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:var(--orange);"></div>
+          <span class="timeline-label">Lagos / Abuja</span>
+          <span class="timeline-time">3–7 days</span>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:rgba(255,255,255,0.3);"></div>
+          <span class="timeline-label">Far North / Nationwide</span>
+          <span class="timeline-time">Up to 2 weeks</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING FORM -->
+<section class="booking-section" id="book">
+  <div class="booking-wrap">
+    <div class="reveal">
+      <div class="eyebrow">Book a Delivery</div>
+      <h2 class="section-title">Send a Package Today</h2>
+      <p class="section-desc">Fill the form and we'll send you a quote within hours. Fast, reliable, nationwide.</p>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:1.5rem;">
+        <div style="display:flex;align-items:center;gap:12px;font-size:0.9rem;color:var(--text-secondary);"><span style="font-size:1.2rem;">💰</span> Quote-based pricing — no surprise charges</div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:0.9rem;color:var(--text-secondary);"><span style="font-size:1.2rem;">🛡️</span> All riders verified and insured</div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:0.9rem;color:var(--text-secondary);"><span style="font-size:1.2rem;">📱</span> WhatsApp: 08118007861</div>
+      </div>
+
+      <!-- Rider CTA -->
+      <div class="rider-cta">
+        <h3>🚚 Are You a Dispatch Rider?</h3>
+        <p>Join Minon Logistics and earn money delivering packages across Nigeria. Verified riders earn more!</p>
+        <a href="/signup" class="btn-primary" style="display:inline-flex;margin:0 auto;">Join as a Rider →</a>
+      </div>
+    </div>
+
+    <div class="booking-form reveal">
+      <h3 style="font-family:'Clash Display',sans-serif;font-size:1.3rem;font-weight:700;color:var(--text-primary);margin-bottom:1.5rem;">📦 Book a Delivery</h3>
+      <div id="deliveryAlert"></div>
+      <div class="form-row-2">
+        <div class="form-group"><label class="form-label">Your Name *</label><input class="form-input" id="dName" placeholder="Full name"></div>
+        <div class="form-group"><label class="form-label">Phone *</label><input class="form-input" id="dPhone" placeholder="08xxxxxxxxx"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Pickup Address *</label><input class="form-input" id="dPickup" placeholder="Where should rider pick up from?"></div>
+      <div class="form-group"><label class="form-label">Delivery Address *</label><input class="form-input" id="dDelivery" placeholder="Where should it be delivered?"></div>
+      <div class="form-group"><label class="form-label">Package Description *</label><input class="form-input" id="dPackage" placeholder="What is being delivered? (e.g. documents, food, electronics)"></div>
+      <div class="form-row-2">
+        <div class="form-group"><label class="form-label">Delivery Type</label>
+          <select class="form-input" id="dType">
+            <option>Standard Delivery</option>
+            <option>Express / Urgent</option>
+            <option>Food Delivery</option>
+            <option>Errand Service</option>
+            <option>Interstate Delivery</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Preferred Time</label>
+          <select class="form-input" id="dTime">
+            <option>As soon as possible</option>
+            <option>Today (morning)</option>
+            <option>Today (afternoon)</option>
+            <option>Today (evening)</option>
+            <option>Tomorrow</option>
+            <option>Schedule a date</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Additional Notes</label><textarea class="form-input" id="dNotes" rows="3" placeholder="Any special instructions for the rider..."></textarea></div>
+      <button class="submit-btn" onclick="submitDelivery()" id="deliveryBtn">Request Delivery & Get Quote 🚚</button>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="section-inner">
+    <h2 class="reveal">Ready to Send a Package?</h2>
+    <p class="reveal">Contact us now on WhatsApp or fill the form above. We deliver everywhere in Nigeria.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;" class="reveal">
+      <a href="https://wa.me/2348118007861" target="_blank" class="btn-primary" style="background:#25D366;color:#fff;box-shadow:0 8px 30px rgba(37,211,102,0.3);">💬 WhatsApp: 08118007861</a>
+      <a href="#book" class="btn-ghost">Book Online →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 <strong>Minon Logistics</strong> — A Branch of Minon Solutions · RC 8965878 · Awka, Anambra State</p>
+  <p style="margin-top:6px;"><a href="/" style="color:var(--teal);text-decoration:none;">← Back to Minon Solutions</a></p>
+</footer>
+
+<script>
+const SUPABASE_URL='https://rmwvrbpkxbxmbpidzbfe.supabase.co';
+const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtd3ZyYnBreGJ4bWJwaWR6YmZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MTE2ODIsImV4cCI6MjA5MjM4NzY4Mn0.aIbszMyL8lAMsF2T4-oSjHbuGr1b5-Az3fI4lGd0aYM';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+
+const reveals=document.querySelectorAll('.reveal');
+const observer=new IntersectionObserver((entries)=>{entries.forEach((entry,i)=>{if(entry.isIntersecting){setTimeout(()=>entry.target.classList.add('visible'),i*80);observer.unobserve(entry.target);}});},{threshold:0.1});
+reveals.forEach(el=>observer.observe(el));
+
+async function submitDelivery(){
+  const name=document.getElementById('dName').value.trim();
+  const phone=document.getElementById('dPhone').value.trim();
+  const pickup=document.getElementById('dPickup').value.trim();
+  const delivery=document.getElementById('dDelivery').value.trim();
+  const pkg=document.getElementById('dPackage').value.trim();
+  const alertEl=document.getElementById('deliveryAlert');
+  const btn=document.getElementById('deliveryBtn');
+
+  if(!name||!phone||!pickup||!delivery||!pkg){
+    alertEl.className='alert error';alertEl.textContent='⚠️ Please fill in all required fields.';return;
+  }
+  btn.disabled=true;btn.textContent='Submitting...';
+
+  try{
+    await sb.from('delivery_jobs').insert({
+      customer_id:null,
+      pickup_address:pickup,
+      delivery_address:delivery,
+      package_description:`${pkg}\nType: ${document.getElementById('dType').value}\nTime: ${document.getElementById('dTime').value}\nNotes: ${document.getElementById('dNotes').value||'None'}`,
+      status:'pending'
+    });
+
+    await sb.from('contact_messages').insert({
+      full_name:name,phone,email:'—',
+      subject:'Delivery Request',
+      message:`Pickup: ${pickup}\nDelivery: ${delivery}\nPackage: ${pkg}\nType: ${document.getElementById('dType').value}`
+    });
+
+    alertEl.className='alert success';
+    alertEl.textContent='✅ Delivery request submitted! We will send your quote via WhatsApp shortly.';
+    ['dName','dPhone','dPickup','dDelivery','dPackage','dNotes'].forEach(id=>document.getElementById(id).value='');
+  }catch(e){
+    alertEl.className='alert error';alertEl.textContent='❌ Something went wrong. WhatsApp us: 08118007861';
+  }
+  btn.disabled=false;btn.textContent='Request Delivery & Get Quote 🚚';
+}
+</script>
+</body>
+</html>

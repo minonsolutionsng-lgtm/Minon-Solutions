@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minon Study — WAEC, JAMB, University & Professional Courses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Bricolage+Grotesque:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--navy:#0D1B3E;--teal:#2EC4B6;--orange:#F4762A;--green:#10B981;--bg:#F0FDF4;--bg-card:#FFFFFF;--text-primary:#0D1B3E;--text-secondary:#4A5568;--text-muted:#8896AB;--border:rgba(13,27,62,0.1);--shadow:0 4px 24px rgba(13,27,62,0.08);--shadow-lg:0 20px 60px rgba(13,27,62,0.14);--success:#10B981;--error:#EF4444;}
+[data-theme="dark"]{--bg:#070E1F;--bg-card:#0F1A35;--text-primary:#F0F4FF;--text-secondary:#A8B8D8;--text-muted:#5A7090;--border:rgba(255,255,255,0.07);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text-primary);transition:background 0.3s,color 0.3s;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,27,62,0.97);backdrop-filter:blur(16px);height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 5%;}
+.nav-logo-text{font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;}
+.nav-logo-text span{color:var(--green);}
+.nav-links{display:flex;align-items:center;gap:1.5rem;}
+.nav-links a{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.875rem;font-weight:500;transition:color 0.2s;}
+.nav-links a:hover{color:#fff;}
+.nav-cta{background:var(--green)!important;color:#fff!important;padding:7px 18px;border-radius:20px;font-weight:700!important;}
+.hero{min-height:100vh;background:linear-gradient(135deg,#0D1B3E 0%,#0a2a1a 60%,#0a1f12 100%);display:flex;align-items:center;padding:100px 5% 60px;position:relative;overflow:hidden;}
+.hero-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.2;}
+.orb1{width:500px;height:500px;background:var(--green);top:-150px;right:-100px;}
+.orb2{width:350px;height:350px;background:var(--teal);bottom:-80px;left:5%;}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:60px 60px;}
+.hero-content{position:relative;z-index:2;max-width:650px;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:var(--green);padding:6px 16px;border-radius:30px;font-size:0.78rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.5rem;}
+.hero-title{font-family:'Clash Display',sans-serif;font-size:clamp(3rem,5.5vw,4.8rem);font-weight:700;color:#fff;line-height:1.05;margin-bottom:1.5rem;}
+.hero-title span{color:var(--green);}
+.hero-desc{color:rgba(255,255,255,0.65);font-size:1.1rem;line-height:1.75;margin-bottom:2.5rem;max-width:520px;}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#fff;padding:14px 28px;border-radius:50px;font-weight:700;font-size:1rem;text-decoration:none;border:none;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;box-shadow:0 8px 30px rgba(16,185,129,0.35);transition:transform 0.2s,box-shadow 0.2s;}
+.btn-primary:hover{transform:translateY(-2px);}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.08);color:#fff;padding:14px 28px;border-radius:50px;font-weight:600;font-size:1rem;text-decoration:none;border:1.5px solid rgba(255,255,255,0.2);cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;transition:all 0.2s;}
+.btn-ghost:hover{background:rgba(255,255,255,0.14);}
+.hero-stats{display:flex;gap:2.5rem;margin-top:3.5rem;padding-top:2.5rem;border-top:1px solid rgba(255,255,255,0.1);flex-wrap:wrap;}
+.hero-stat-num{font-family:'Clash Display',sans-serif;font-size:2rem;font-weight:700;color:#fff;}
+.hero-stat-num span{color:var(--green);}
+.hero-stat-label{font-size:0.78rem;color:rgba(255,255,255,0.45);margin-top:2px;}
+section{padding:90px 5%;}
+.section-inner{max-width:1200px;margin:0 auto;}
+.eyebrow{display:inline-block;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:var(--green);font-size:0.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:1rem;}
+.section-title{font-family:'Clash Display',sans-serif;font-size:clamp(2rem,3.5vw,3rem);font-weight:700;color:var(--text-primary);line-height:1.1;margin-bottom:1rem;}
+.section-desc{color:var(--text-muted);font-size:1rem;line-height:1.75;max-width:540px;margin-bottom:3rem;}
+
+/* SEARCH */
+.search-section{background:var(--bg-card);border-bottom:1px solid var(--border);padding:40px 5%;}
+.search-wrap{max-width:700px;margin:0 auto;text-align:center;}
+.search-bar{display:flex;gap:12px;background:var(--bg);border:2px solid var(--border);border-radius:50px;padding:8px 8px 8px 20px;align-items:center;transition:border-color 0.2s;}
+.search-bar:focus-within{border-color:var(--green);}
+.search-bar input{flex:1;border:none;outline:none;background:transparent;font-family:'Bricolage Grotesque',sans-serif;font-size:0.95rem;color:var(--text-primary);}
+.search-bar input::placeholder{color:var(--text-muted);}
+.search-btn{background:var(--green);color:#fff;border:none;border-radius:50px;padding:10px 24px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.875rem;font-weight:700;cursor:pointer;}
+.category-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px;}
+.chip{background:var(--bg);border:1.5px solid var(--border);color:var(--text-secondary);padding:6px 16px;border-radius:20px;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.chip:hover,.chip.active{background:var(--green);border-color:var(--green);color:#fff;}
+
+/* MATERIAL CARDS */
+.materials-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;}
+.material-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:18px;overflow:hidden;transition:transform 0.25s,box-shadow 0.25s,border-color 0.25s;}
+.material-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg);border-color:var(--green);}
+.material-thumb{width:100%;height:160px;object-fit:cover;background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(46,196,182,0.08));display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative;}
+.material-type-badge{position:absolute;top:10px;right:10px;padding:3px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;}
+.type-pdf{background:rgba(239,68,68,0.9);color:#fff;}
+.type-video{background:rgba(99,102,241,0.9);color:#fff;}
+.type-live{background:rgba(16,185,129,0.9);color:#fff;}
+.material-body{padding:16px;}
+.material-title{font-weight:700;font-size:0.92rem;color:var(--text-primary);margin-bottom:4px;}
+.material-subject{font-size:0.72rem;color:var(--green);font-weight:600;margin-bottom:8px;}
+.material-price{font-family:'Clash Display',sans-serif;font-size:1.2rem;font-weight:700;color:var(--orange);}
+.material-meta{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+.material-sales{font-size:0.72rem;color:var(--text-muted);}
+.buy-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;padding:10px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;margin-top:10px;transition:background 0.2s;}
+.buy-btn:hover{background:#0d9a6d;}
+
+/* SUBJECT CATEGORIES */
+.subjects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
+.subject-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:14px;padding:16px;text-align:center;cursor:pointer;transition:all 0.2s;}
+.subject-card:hover{border-color:var(--green);transform:translateY(-2px);}
+.subject-icon{font-size:1.8rem;margin-bottom:8px;}
+.subject-name{font-size:0.82rem;font-weight:700;color:var(--text-primary);}
+
+/* FEATURES */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+.feature-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:16px;padding:2rem;text-align:center;transition:border-color 0.2s,transform 0.2s;}
+.feature-card:hover{border-color:var(--green);transform:translateY(-3px);}
+.feature-icon{font-size:2.2rem;margin-bottom:1rem;}
+.feature-card h4{font-family:'Clash Display',sans-serif;font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:0.5rem;}
+.feature-card p{color:var(--text-muted);font-size:0.83rem;line-height:1.6;}
+
+/* STATS BANNER */
+.stats-banner{background:linear-gradient(135deg,var(--navy),#0a2a1a);padding:60px 5%;}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;max-width:1000px;margin:0 auto;text-align:center;}
+.stat-item{}
+.stat-num{font-family:'Clash Display',sans-serif;font-size:2.8rem;font-weight:700;color:#fff;}
+.stat-num span{color:var(--green);}
+.stat-label{color:rgba(255,255,255,0.5);font-size:0.82rem;margin-top:6px;}
+
+.cta-section{background:linear-gradient(135deg,var(--navy),#0a2a1a);padding:90px 5%;text-align:center;}
+.cta-section h2{font-family:'Clash Display',sans-serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:700;color:#fff;margin-bottom:1rem;}
+.cta-section p{color:rgba(255,255,255,0.6);font-size:1rem;margin-bottom:2.5rem;}
+footer{background:#050D1F;color:rgba(255,255,255,0.5);text-align:center;padding:2rem 5%;font-size:0.85rem;}
+footer strong{color:var(--green);}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.loading{text-align:center;padding:3rem;color:var(--text-muted);}
+.empty-state{text-align:center;padding:3rem;color:var(--text-muted);}
+.empty-state-icon{font-size:3rem;margin-bottom:1rem;opacity:0.4;}
+@media(max-width:1024px){.features-grid{grid-template-columns:repeat(2,1fr);}.stats-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:768px){.nav-links{display:none;}.hero-title{font-size:2.8rem;}.features-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-logo-text">Min<span>o</span>n Study</div>
+  <div class="nav-links">
+    <a href="/">← Home</a>
+    <a href="#subjects">Subjects</a>
+    <a href="#materials">Materials</a>
+    <a href="/signup">Get Access</a>
+    <a href="/signup" class="nav-cta">Start Learning</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-orb orb1"></div><div class="hero-orb orb2"></div><div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">📚 Minon Study</div>
+    <h1 class="hero-title">Ace Your Exams<br>with <span>Expert Tutors</span></h1>
+    <p class="hero-desc">WAEC, NECO, JAMB prep, university assignments, professional skills and downloadable study materials — all in one place. Learn from verified Nigerian tutors.</p>
+    <div class="hero-actions">
+      <a href="#materials" class="btn-primary">📚 Browse Materials</a>
+      <a href="#subjects" class="btn-ghost">View Subjects →</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hero-stat-num">100<span>+</span></div><div class="hero-stat-label">Study Materials</div></div>
+      <div><div class="hero-stat-num">✅</div><div class="hero-stat-label">Verified Tutors</div></div>
+      <div><div class="hero-stat-num">🎓</div><div class="hero-stat-label">WAEC, JAMB & More</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<div class="search-section">
+  <div class="search-wrap">
+    <div class="search-bar">
+      <span>🔍</span>
+      <input type="text" id="searchInput" placeholder="Search study materials, subjects, topics..." onkeypress="if(event.key==='Enter')searchMaterials()">
+      <button class="search-btn" onclick="searchMaterials()">Search</button>
+    </div>
+    <div class="category-chips">
+      <span class="chip active" onclick="filterType('',this)">All</span>
+      <span class="chip" onclick="filterType('pdf',this)">📄 PDF Materials</span>
+      <span class="chip" onclick="filterType('video',this)">🎥 Video Lessons</span>
+      <span class="chip" onclick="filterType('live_class',this)">🎓 Live Classes</span>
+    </div>
+  </div>
+</div>
+
+<!-- SUBJECTS -->
+<section id="subjects" style="padding-bottom:40px;">
+  <div class="section-inner">
+    <div class="reveal"><div class="eyebrow">Browse by Subject</div><h2 class="section-title">What Do You Want to Study?</h2></div>
+    <div class="subjects-grid">
+      <div class="subject-card reveal" onclick="filterSubject('Mathematics')"><div class="subject-icon">📐</div><div class="subject-name">Mathematics</div></div>
+      <div class="subject-card reveal" onclick="filterSubject('English Language')"><div class="subject-icon">📝</div><div class="subject-name">English</div></div>
+      <div class="subject-card reveal" onclick="filterSubject('Physics')"><div class="subject-icon">⚛️</div><div class="subject-name">Physics</div></div>
+      <div class="subject-card reveal" onclick="filterSubject('Chemistry')"><div class="subject-icon">🧪</div><div class="subject-name">Chemistry</div></div>
+      <div class="subject-card reveal" onclick="filterSubject('Biology')"><div class="subject-icon">🧬</div><div class="subject-name">Biology</div></div>
+      <div class="subject-card reveal" onclick="filterSubject('Economics')"><div class="subject-icon">📊</div><div class="subject-name">Economics</div></div>
+      <div class="subject-card reveal" onclick="filterSubject('Government')"><div class="subject-icon">🏛️</div><div class="subject-name">Government</div></div>
+      <div class="subject-card reveal" onclick="filterSubject('Literature')"><div class="subject-icon">📖</div><div class="subject-name">Literature</div></div>
+      <div class="subject-card reveal" onclick="filterSubject('Accounting')"><div class="subject-icon">🧮</div><div class="subject-name">Accounting</div></div>
+      <div class="subject-card reveal" onclick="filterSubject('Computer Science')"><div class="subject-icon">💻</div><div class="subject-name">Computer</div></div>
+      <div class="subject-card reveal" onclick="filterSubject('Web Development')"><div class="subject-icon">🌐</div><div class="subject-name">Web Dev</div></div>
+      <div class="subject-card reveal" onclick="filterSubject('')"><div class="subject-icon">📦</div><div class="subject-name">All Subjects</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- MATERIALS -->
+<section id="materials" style="padding-top:40px;background:var(--bg-card);border-top:1px solid var(--border);">
+  <div class="section-inner">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;" class="reveal">
+      <div><div class="eyebrow">Study Materials</div><h2 class="section-title" style="margin-bottom:0;">Learn & Excel</h2></div>
+      <select id="sortSelect" onchange="loadMaterials()" style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:8px 14px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.85rem;color:var(--text-primary);outline:none;">
+        <option value="latest">Latest First</option>
+        <option value="popular">Most Popular</option>
+        <option value="price_low">Price: Low to High</option>
+      </select>
+    </div>
+    <div class="materials-grid" id="materialsGrid">
+      <div class="loading" style="grid-column:1/-1;">Loading study materials... 📚</div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-banner">
+  <div class="stats-row">
+    <div class="stat-item reveal"><div class="stat-num">5<span>+</span></div><div class="stat-label">Years Teaching</div></div>
+    <div class="stat-item reveal"><div class="stat-num">📚</div><div class="stat-label">All Exam Types</div></div>
+    <div class="stat-item reveal"><div class="stat-num">✅</div><div class="stat-label">Verified Tutors</div></div>
+    <div class="stat-item reveal"><div class="stat-num">🎓</div><div class="stat-label">WAEC JAMB NECO</div></div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section>
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center;margin-bottom:3rem;"><div class="eyebrow">Why Minon Study</div><h2 class="section-title">Everything You Need to Pass</h2></div>
+    <div class="features-grid">
+      <div class="feature-card reveal"><div class="feature-icon">📄</div><h4>PDF Study Materials</h4><p>Downloadable past questions, notes and study guides. Access anytime, anywhere — no internet needed after download.</p></div>
+      <div class="feature-card reveal"><div class="feature-icon">🎥</div><h4>Video Lessons</h4><p>Watch expert tutors break down complex topics step by step. Pause, rewind and replay until you understand.</p></div>
+      <div class="feature-card reveal"><div class="feature-icon">🎓</div><h4>Live Classes</h4><p>Book one-on-one or group sessions with verified tutors on Zoom or Google Meet. Interactive and personalized.</p></div>
+      <div class="feature-card reveal"><div class="feature-icon">✅</div><h4>Verified Tutors</h4><p>All tutors on Minon Study are reviewed and verified by the Minon Solutions team. Only the best teach here.</p></div>
+      <div class="feature-card reveal"><div class="feature-icon">📱</div><h4>Access Anywhere</h4><p>Study on your phone, tablet or laptop. Materials available 24/7 from your student dashboard.</p></div>
+      <div class="feature-card reveal"><div class="feature-icon">💰</div><h4>Affordable Prices</h4><p>Quality education doesn't have to be expensive. Competitive prices set by Minon Solutions for all students.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="section-inner">
+    <h2 class="reveal">Start Learning Today</h2>
+    <p class="reveal">Access study materials, book live classes and ace your exams with Minon Study.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;" class="reveal">
+      <a href="/signup" class="btn-primary">🎓 Create Free Account</a>
+      <a href="https://wa.me/2348118007861" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;padding:14px 28px;border-radius:50px;font-weight:700;text-decoration:none;">💬 WhatsApp Us</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 <strong>Minon Study</strong> — A Branch of Minon Solutions · RC 8965878 · Awka, Anambra State</p>
+  <p style="margin-top:6px;"><a href="/" style="color:var(--green);text-decoration:none;">← Back to Minon Solutions</a></p>
+</footer>
+
+<script>
+const SUPABASE_URL='https://rmwvrbpkxbxmbpidzbfe.supabase.co';
+const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtd3ZyYnBreGJ4bWJwaWR6YmZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MTE2ODIsImV4cCI6MjA5MjM4NzY4Mn0.aIbszMyL8lAMsF2T4-oSjHbuGr1b5-Az3fI4lGd0aYM';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+let currentType='';let currentSubject='';let currentSearch='';
+
+const reveals=document.querySelectorAll('.reveal');
+const observer=new IntersectionObserver((entries)=>{entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('visible'),i*80);observer.unobserve(e.target);}});},{threshold:0.1});
+reveals.forEach(el=>observer.observe(el));
+
+async function loadMaterials(){
+  const grid=document.getElementById('materialsGrid');
+  grid.innerHTML='<div class="loading" style="grid-column:1/-1;">Loading... 📚</div>';
+  const sort=document.getElementById('sortSelect').value;
+  let q=sb.from('study_materials').select('*').eq('is_available',true);
+  if(currentType)q=q.eq('material_type',currentType);
+  if(currentSubject)q=q.eq('subject',currentSubject);
+  if(currentSearch)q=q.ilike('title',`%${currentSearch}%`);
+  if(sort==='popular')q=q.order('total_purchases',{ascending:false});
+  else if(sort==='price_low')q=q.order('price',{ascending:true});
+  else q=q.order('created_at',{ascending:false});
+  q=q.limit(12);
+  const{data}=await q;
+  grid.innerHTML='';
+  if(!data?.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">📚</div><p>No materials yet. <a href="/signup" style="color:var(--green);font-weight:700;">Check back soon!</a></p></div>';return;}
+  data.forEach(m=>grid.innerHTML+=materialCard(m));
+}
+
+function materialCard(m){
+  const icons={pdf:'📄',video:'🎥',live_class:'🎓'};
+  const labels={pdf:'PDF',video:'Video',live_class:'Live Class'};
+  const badgeClass={pdf:'type-pdf',video:'type-video',live_class:'type-live'};
+  return`<div class="material-card">
+    <div class="material-thumb">${icons[m.material_type]||'📄'}<div class="material-type-badge ${badgeClass[m.material_type]||'type-pdf'}">${labels[m.material_type]||'PDF'}</div></div>
+    <div class="material-body">
+      <div class="material-title">${m.title}</div>
+      <div class="material-subject">${m.subject}</div>
+      <div class="material-price">₦${fmt(m.price)}</div>
+      <div class="material-meta">
+        <div class="material-sales">📥 ${m.total_purchases||0} purchased</div>
+      </div>
+      <button class="buy-btn" onclick="purchaseMaterial('${m.id}','${m.title}',${m.price})">Buy Now →</button>
+    </div>
+  </div>`;
+}
+
+function filterType(type,el){
+  currentType=type;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  if(el)el.classList.add('active');
+  loadMaterials();
+}
+
+function filterSubject(subject){
+  currentSubject=subject;
+  loadMaterials();
+  document.getElementById('materials').scrollIntoView({behavior:'smooth'});
+}
+
+function searchMaterials(){
+  currentSearch=document.getElementById('searchInput').value.trim();
+  loadMaterials();
+}
+
+async function purchaseMaterial(id,title,price){
+  const{data:{session}}=await sb.auth.getSession();
+  if(!session){window.location.href='/login';return;}
+  alert(`To purchase "${title}" for ₦${fmt(price)}:\n\n1. Transfer ₦${fmt(price)} to:\nMinon Solutions · 6383313367 · Moniepoint MFB\n\n2. Log in and upload your receipt in your dashboard\n3. Admin verifies and grants you access\n\nWhatsApp: 08118007861`);
+}
+
+function fmt(n){return Number(n||0).toLocaleString('en-NG');}
+window.addEventListener('DOMContentLoaded',loadMaterials);
+</script>
+</body>
+</html>

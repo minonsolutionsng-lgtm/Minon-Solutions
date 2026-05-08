@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<script>(function(){var t=localStorage.getItem('minon-theme');document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light');})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minon Solutions — Your Central Hub for Everything</title>
+<meta name="description" content="Nigeria's all-in-one platform — Logistics, Marketplace, Food, Digital Agency, Education, Real Estate and more. RC 8965878.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Bricolage+Grotesque:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET ===== */
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+
+/* ===== VARIABLES ===== */
+:root{
+  --navy:#0D1B3E;--teal:#2EC4B6;--orange:#F4762A;
+  --violet:#7c3aed;--emerald:#10b981;--rose:#f43f5e;--gold:#D4A017;
+  --bg:#F4F6FB;--bg-card:#FFFFFF;
+  --text-primary:#0D1B3E;--text-secondary:#4A5568;--text-muted:#8896AB;
+  --border:rgba(13,27,62,0.09);
+  --shadow:0 4px 24px rgba(13,27,62,0.07);
+  --shadow-lg:0 20px 60px rgba(13,27,62,0.13);
+  --nav-bg:rgba(244,246,251,0.9);
+}
+[data-theme="dark"]{
+  --bg:#060C1A;--bg-card:#0D1830;
+  --text-primary:#EEF2FF;--text-secondary:#A8B8D8;--text-muted:#4A6080;
+  --border:rgba(255,255,255,0.07);
+  --shadow:0 4px 24px rgba(0,0,0,0.35);
+  --shadow-lg:0 20px 60px rgba(0,0,0,0.5);
+  --nav-bg:rgba(6,12,26,0.93);
+}
+body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;transition:background 0.4s,color 0.4s;}
+
+/* ===== NAV ===== */
+nav{position:fixed;inset:0 0 auto;z-index:999;height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 5%;background:var(--nav-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:background 0.4s,box-shadow 0.3s;}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo-icon{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--teal),var(--orange));display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:800;color:#fff;font-size:1rem;flex-shrink:0;}
+.nav-logo-text{font-family:'Clash Display',sans-serif;font-size:1.05rem;font-weight:700;color:var(--text-primary);line-height:1.1;}
+.nav-logo-text span{color:var(--orange);}
+.nav-rc{font-size:0.58rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;}
+.nav-links{display:flex;align-items:center;gap:2px;}
+.nav-links a{color:var(--text-secondary);text-decoration:none;font-size:0.85rem;font-weight:500;padding:7px 12px;border-radius:8px;transition:color 0.2s,background 0.2s;white-space:nowrap;}
+.nav-links a:hover{color:var(--text-primary);background:rgba(13,27,62,0.05);}
+[data-theme="dark"] .nav-links a:hover{background:rgba(255,255,255,0.06);}
+.nav-cta{background:var(--orange)!important;color:#fff!important;padding:8px 20px;border-radius:24px;font-weight:700!important;box-shadow:0 4px 16px rgba(244,118,42,0.3);}
+.nav-cta:hover{background:#d95f15!important;transform:translateY(-1px);}
+.nav-theme-btn{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--border);background:var(--bg-card);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all 0.2s;flex-shrink:0;margin-left:6px;}
+.nav-theme-btn:hover{border-color:var(--teal);}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;margin-left:4px;}
+.hamburger span{width:22px;height:2px;background:var(--text-primary);border-radius:2px;transition:all 0.3s;}
+.mobile-menu{display:none;position:fixed;top:66px;left:0;right:0;background:var(--bg-card);border-bottom:1px solid var(--border);padding:1.2rem 5%;flex-direction:column;gap:4px;z-index:998;box-shadow:var(--shadow-lg);}
+.mobile-menu a{color:var(--text-secondary);text-decoration:none;font-size:0.95rem;font-weight:500;padding:10px 14px;border-radius:10px;transition:all 0.2s;display:block;}
+.mobile-menu a:hover{color:var(--text-primary);background:rgba(13,27,62,0.04);}
+.mobile-menu .nav-cta{background:var(--orange)!important;color:#fff!important;text-align:center;margin-top:6px;border-radius:12px;}
+
+/* ===== HERO ===== */
+.hero{min-height:100vh;background:linear-gradient(150deg,#04091a 0%,#0D1B3E 35%,#0d1533 70%,#040a1c 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:130px 5% 90px;position:relative;overflow:hidden;text-align:center;}
+/* orbs */
+.orb{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none;}
+.orb-1{width:600px;height:600px;background:radial-gradient(circle,rgba(46,196,182,0.2) 0%,transparent 70%);top:-200px;right:-100px;animation:float1 14s ease-in-out infinite;}
+.orb-2{width:500px;height:500px;background:radial-gradient(circle,rgba(244,118,42,0.15) 0%,transparent 70%);bottom:-150px;left:-80px;animation:float2 11s ease-in-out infinite;}
+.orb-3{width:320px;height:320px;background:radial-gradient(circle,rgba(124,58,237,0.12) 0%,transparent 70%);top:50%;left:40%;animation:float1 17s ease-in-out infinite 3s;}
+@keyframes float1{0%,100%{transform:translateY(0);}50%{transform:translateY(-50px);}}
+@keyframes float2{0%,100%{transform:translateY(0);}50%{transform:translateY(40px);}}
+/* grid dots */
+.hero-dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.06) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;}
+.hero-inner{position:relative;z-index:2;max-width:860px;}
+
+/* pill */
+.hero-pill{display:inline-flex;align-items:center;gap:8px;background:rgba(46,196,182,0.1);border:1px solid rgba(46,196,182,0.3);color:var(--teal);padding:8px 18px;border-radius:40px;font-size:0.78rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:2rem;animation:fadeUp 0.6s ease both;}
+.pill-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+/* title */
+.hero-h1{font-family:'Clash Display',sans-serif;font-size:clamp(3.2rem,7vw,6.5rem);font-weight:700;color:#fff;line-height:0.98;margin-bottom:2rem;animation:fadeUp 0.7s ease 0.1s both;}
+.hero-h1 .line{display:block;}
+.hero-h1 .w{display:inline-block;}
+.hero-h1 .stroke{color:transparent;-webkit-text-stroke:2px var(--teal);}
+.hero-h1 .clr{color:var(--orange);}
+
+.hero-desc{font-size:clamp(1rem,1.8vw,1.2rem);color:rgba(255,255,255,0.55);line-height:1.85;max-width:600px;margin:0 auto 2.8rem;animation:fadeUp 0.7s ease 0.25s both;}
+
+/* buttons */
+.hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;animation:fadeUp 0.7s ease 0.35s both;}
+.btn-glow{display:inline-flex;align-items:center;gap:10px;background:var(--orange);color:#fff;padding:16px 34px;border-radius:50px;font-weight:700;font-size:1rem;text-decoration:none;border:none;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;box-shadow:0 8px 32px rgba(244,118,42,0.45);transition:transform 0.25s,box-shadow 0.25s;}
+.btn-glow:hover{transform:translateY(-3px);box-shadow:0 14px 44px rgba(244,118,42,0.55);}
+.btn-glass{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,0.07);color:#fff;padding:16px 34px;border-radius:50px;font-weight:600;font-size:1rem;text-decoration:none;border:1.5px solid rgba(255,255,255,0.18);cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;transition:all 0.25s;backdrop-filter:blur(6px);}
+.btn-glass:hover{background:rgba(255,255,255,0.12);}
+
+/* floating chips */
+.hero-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:3rem;animation:fadeUp 0.7s ease 0.45s both;}
+.chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.55);padding:7px 16px;border-radius:30px;font-size:0.78rem;font-weight:600;backdrop-filter:blur(4px);transition:all 0.25s;cursor:default;}
+.chip:hover{background:rgba(255,255,255,0.12);color:#fff;border-color:rgba(255,255,255,0.22);}
+
+/* scroll hint */
+.scroll-hint{position:absolute;bottom:38px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(255,255,255,0.3);font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;z-index:2;animation:fadeUp 1s ease 0.8s both;}
+.scroll-line{width:1px;height:44px;background:linear-gradient(to bottom,rgba(255,255,255,0.3),transparent);animation:scrollPulse 2.2s ease-in-out infinite;}
+@keyframes scrollPulse{0%,100%{opacity:1;transform:scaleY(1);}50%{opacity:0.3;transform:scaleY(0.5);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+
+/* ===== TICKER ===== */
+.ticker{background:var(--navy);padding:15px 0;overflow:hidden;border-top:1px solid rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.05);}
+.ticker-wrap{display:flex;width:max-content;animation:tick 38s linear infinite;}
+.ticker-item{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,0.45);font-size:0.82rem;font-weight:500;padding:0 3rem;white-space:nowrap;}
+.t-dot{color:var(--orange);}
+@keyframes tick{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* ===== SHARED SECTION ===== */
+.sec{padding:100px 5%;}
+.inner{max-width:1200px;margin:0 auto;}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:0.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;}
+.eyebrow::before{content:'';width:20px;height:2px;background:var(--orange);border-radius:2px;flex-shrink:0;}
+.sec-title{font-family:'Clash Display',sans-serif;font-size:clamp(2.2rem,4vw,3.4rem);font-weight:700;color:var(--text-primary);line-height:1.08;margin-bottom:1.2rem;}
+.sec-title em{color:var(--teal);font-style:normal;}
+.sec-desc{color:var(--text-muted);font-size:1.05rem;line-height:1.85;max-width:520px;}
+
+/* ===== WHAT WE DO ===== */
+.wd-intro{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;margin-bottom:80px;}
+.wd-big{font-family:'Clash Display',sans-serif;font-size:clamp(2rem,3.5vw,3rem);font-weight:700;color:var(--text-primary);line-height:1.1;}
+.wd-big em{color:var(--orange);font-style:normal;}
+.wd-right p{color:var(--text-muted);font-size:1.05rem;line-height:1.85;margin-bottom:1.8rem;}
+.wd-stats{display:flex;gap:2.5rem;flex-wrap:wrap;}
+.wds-num{font-family:'Clash Display',sans-serif;font-size:2.2rem;font-weight:700;color:var(--text-primary);}
+.wds-num span{color:var(--teal);}
+.wds-label{font-size:0.72rem;color:var(--text-muted);margin-top:2px;letter-spacing:0.5px;}
+
+/* BENTO */
+.bento{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;}
+.bc{background:var(--bg-card);border:1.5px solid var(--border);border-radius:22px;padding:26px;position:relative;overflow:hidden;text-decoration:none;display:flex;flex-direction:column;gap:0;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.3s,border-color 0.3s;}
+.bc:hover{transform:translateY(-7px);box-shadow:var(--shadow-lg);}
+/* arrow */
+.bc::after{content:'→';position:absolute;top:22px;right:22px;width:32px;height:32px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:0.85rem;color:var(--text-muted);transition:all 0.3s;}
+.bc:hover::after{background:var(--accent,var(--orange));color:#fff;transform:translate(2px,-2px);}
+/* accents on hover */
+.bc:hover{border-color:var(--accent,var(--orange));}
+/* icon */
+.bc-ico{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1.1rem;flex-shrink:0;}
+/* label pill */
+.bc-pill{display:inline-block;font-size:0.67rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:0.7rem;}
+.bc h3{font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:0.55rem;}
+.bc p{color:var(--text-muted);font-size:0.85rem;line-height:1.65;flex:1;}
+.bc-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:1rem;}
+.btag{font-size:0.67rem;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--border);color:var(--text-muted);}
+
+/* Bento spans */
+.s4{grid-column:span 4;}.s6{grid-column:span 6;}.s3{grid-column:span 3;}
+
+/* ===== HOW IT WORKS ===== */
+.hiw{background:linear-gradient(140deg,#050e20 0%,var(--navy) 50%,#060f24 100%);padding:100px 5%;position:relative;overflow:hidden;}
+.hiw-glow-1{position:absolute;top:-150px;right:-150px;width:550px;height:550px;background:radial-gradient(circle,rgba(46,196,182,0.09) 0%,transparent 70%);border-radius:50%;}
+.hiw-glow-2{position:absolute;bottom:-100px;left:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(244,118,42,0.07) 0%,transparent 70%);border-radius:50%;}
+.hiw-head{text-align:center;margin-bottom:70px;position:relative;z-index:1;}
+.hiw-head .eyebrow{color:var(--teal);}
+.hiw-head .eyebrow::before{background:var(--teal);}
+.hiw-head .sec-title{color:#fff;}
+.hiw-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;position:relative;z-index:1;}
+.hiw-steps::before{content:'';position:absolute;top:42px;left:12.5%;right:12.5%;height:1px;background:linear-gradient(90deg,transparent,rgba(46,196,182,0.4),rgba(244,118,42,0.4),transparent);}
+.hs{text-align:center;padding:0 1.2rem;}
+.hs-num{width:84px;height:84px;border-radius:50%;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-family:'Clash Display',sans-serif;font-size:1.6rem;font-weight:700;color:#fff;position:relative;}
+.hs-num::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px dashed rgba(255,255,255,0.08);animation:spin 14s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.hs h4{font-family:'Clash Display',sans-serif;font-size:1rem;font-weight:700;color:#fff;margin-bottom:0.7rem;}
+.hs p{font-size:0.84rem;color:rgba(255,255,255,0.4);line-height:1.75;}
+
+/* ===== PRICING ===== */
+.pricing-sec{background:var(--bg-card);border-top:1px solid var(--border);}
+.p-tabs{display:flex;gap:10px;margin-bottom:3rem;flex-wrap:wrap;}
+.ptab{background:var(--bg);border:1.5px solid var(--border);color:var(--text-muted);padding:9px 22px;border-radius:30px;font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;font-family:'Bricolage Grotesque',sans-serif;}
+.ptab:hover,.ptab.on{background:var(--orange);border-color:var(--orange);color:#fff;}
+.ppanel{display:none;animation:fadeUp 0.4s ease both;}
+.ppanel.on{display:block;}
+
+/* Meta grid */
+.meta-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+.mcard{background:var(--bg);border:1.5px solid var(--border);border-radius:18px;padding:22px;transition:transform 0.25s,border-color 0.25s,box-shadow 0.25s;}
+.mcard:hover{transform:translateY(-5px);border-color:var(--orange);box-shadow:var(--shadow-lg);}
+.mcard.hot{border-color:var(--orange);background:rgba(244,118,42,0.03);}
+.hot-tag{display:inline-block;background:var(--orange);color:#fff;font-size:0.65rem;font-weight:700;padding:2px 10px;border-radius:20px;margin-bottom:10px;}
+.m-name{font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.m-price{font-family:'Clash Display',sans-serif;font-size:1.8rem;font-weight:700;color:var(--text-primary);margin-bottom:14px;}
+.m-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
+.m-list li{font-size:0.78rem;color:var(--text-secondary);display:flex;align-items:flex-start;gap:7px;}
+.m-list li::before{content:'✓';color:var(--teal);font-weight:700;flex-shrink:0;margin-top:1px;}
+
+/* CAC grid */
+.cac-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+.ccard{background:var(--bg);border:1.5px solid var(--border);border-radius:16px;padding:22px;text-align:center;transition:all 0.25s;}
+.ccard:hover{border-color:var(--orange);transform:translateY(-4px);box-shadow:var(--shadow);}
+.ccard-ico{font-size:2rem;margin-bottom:10px;}
+.ccard-name{font-family:'Clash Display',sans-serif;font-size:0.88rem;font-weight:700;color:var(--text-primary);margin-bottom:4px;}
+.ccard-price{font-family:'Clash Display',sans-serif;font-size:1.3rem;font-weight:700;color:var(--orange);margin-bottom:4px;}
+.ccard-sub{font-size:0.72rem;color:var(--text-muted);}
+.p-note{margin-top:1.5rem;background:rgba(46,196,182,0.06);border:1px solid rgba(46,196,182,0.2);border-radius:12px;padding:14px 20px;font-size:0.85rem;color:var(--teal);font-weight:600;}
+.p-cta{text-align:center;margin-top:2rem;}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--orange);color:#fff;padding:14px 30px;border-radius:50px;font-weight:700;font-size:0.95rem;text-decoration:none;box-shadow:0 6px 24px rgba(244,118,42,0.35);transition:transform 0.2s,box-shadow 0.2s;font-family:'Bricolage Grotesque',sans-serif;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(244,118,42,0.45);}
+
+/* ===== TESTIMONIALS ===== */
+.testi{background:var(--bg);}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:3rem;}
+.tcard{background:var(--bg-card);border:1.5px solid var(--border);border-radius:22px;padding:28px;transition:transform 0.3s,box-shadow 0.3s;}
+.tcard:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);}
+.tstars{color:#FBBF24;letter-spacing:3px;margin-bottom:1.2rem;font-size:0.9rem;}
+.tquote{color:var(--text-secondary);font-size:0.92rem;line-height:1.82;margin-bottom:1.5rem;font-style:italic;}
+.tauthor{display:flex;align-items:center;gap:12px;}
+.tav{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--orange));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.85rem;flex-shrink:0;}
+.tname{font-weight:700;font-size:0.88rem;color:var(--text-primary);}
+.trole{font-size:0.72rem;color:var(--text-muted);}
+
+/* ===== CTA BAND ===== */
+.cta-band{background:linear-gradient(140deg,var(--navy) 0%,#0a1628 100%);padding:110px 5%;position:relative;overflow:hidden;text-align:center;}
+.cta-band::before{content:'';position:absolute;top:-100px;left:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(244,118,42,0.1) 0%,transparent 60%);border-radius:50%;}
+.cta-band::after{content:'';position:absolute;bottom:-80px;right:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(46,196,182,0.09) 0%,transparent 60%);border-radius:50%;}
+.cta-inner{position:relative;z-index:1;max-width:680px;margin:0 auto;}
+.cta-inner h2{font-family:'Clash Display',sans-serif;font-size:clamp(2.4rem,4.5vw,4rem);font-weight:700;color:#fff;line-height:1.06;margin-bottom:1.2rem;}
+.cta-inner h2 span{color:var(--orange);}
+.cta-inner p{color:rgba(255,255,255,0.5);font-size:1.05rem;line-height:1.85;margin-bottom:2.8rem;}
+.cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+.btn-teal{display:inline-flex;align-items:center;gap:10px;background:var(--teal);color:var(--navy);padding:15px 32px;border-radius:50px;font-weight:700;font-size:1rem;text-decoration:none;box-shadow:0 8px 28px rgba(46,196,182,0.3);transition:transform 0.25s;}
+.btn-teal:hover{transform:translateY(-3px);}
+.btn-wa{display:inline-flex;align-items:center;gap:10px;background:#25D366;color:#fff;padding:15px 32px;border-radius:50px;font-weight:700;font-size:1rem;text-decoration:none;box-shadow:0 8px 28px rgba(37,211,102,0.3);transition:transform 0.25s;}
+.btn-wa:hover{transform:translateY(-3px);}
+
+/* ===== FOOTER ===== */
+footer{background:#040A18;padding:70px 5% 28px;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;max-width:1200px;margin:0 auto 3rem;}
+.f-logo{display:flex;align-items:center;gap:10px;margin-bottom:1.2rem;}
+.f-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--teal),var(--orange));display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:800;color:#fff;font-size:0.95rem;}
+.f-name{font-family:'Clash Display',sans-serif;font-size:1rem;font-weight:700;color:#fff;}
+.f-name span{color:var(--orange);}
+.f-desc{color:rgba(255,255,255,0.35);font-size:0.84rem;line-height:1.8;max-width:250px;margin-bottom:1.5rem;}
+.f-socials{display:flex;gap:8px;}
+.fsoc{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.4);font-size:0.82rem;text-decoration:none;transition:all 0.2s;font-weight:700;}
+.fsoc:hover{background:var(--orange);border-color:var(--orange);color:#fff;}
+.f-col h5{font-family:'Clash Display',sans-serif;font-size:0.84rem;font-weight:700;color:#fff;margin-bottom:1.2rem;letter-spacing:0.5px;}
+.f-col ul{list-style:none;display:flex;flex-direction:column;gap:0.6rem;}
+.f-col ul li a{color:rgba(255,255,255,0.35);text-decoration:none;font-size:0.84rem;transition:color 0.2s;}
+.f-col ul li a:hover{color:var(--teal);}
+.f-bottom{max-width:1200px;margin:0 auto;border-top:1px solid rgba(255,255,255,0.05);padding-top:1.8rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.f-bottom p{color:rgba(255,255,255,0.22);font-size:0.78rem;}
+.f-bottom p strong{color:var(--orange);}
+.f-links{display:flex;gap:1.5rem;}
+.f-links a{color:rgba(255,255,255,0.22);text-decoration:none;font-size:0.78rem;transition:color 0.2s;}
+.f-links a:hover{color:var(--teal);}
+
+/* ===== COOKIE ===== */
+.cookie{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);z-index:9999;background:var(--bg-card);border:1.5px solid var(--border);border-radius:18px;padding:1.2rem 1.8rem;display:flex;align-items:center;gap:1.5rem;max-width:680px;width:92%;box-shadow:var(--shadow-lg);opacity:0;transition:all 0.4s;pointer-events:none;}
+.cookie.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:all;}
+.c-text{color:var(--text-secondary);font-size:0.83rem;line-height:1.6;flex:1;}
+.c-text a{color:var(--teal);}
+.c-btns{display:flex;gap:8px;flex-shrink:0;}
+.cbtn{border-radius:10px;padding:9px 16px;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;border:none;}
+.cbtn-ok{background:var(--orange);color:#fff;}
+.cbtn-no{background:var(--bg);color:var(--text-muted);border:1.5px solid var(--border);}
+
+/* ===== REVEAL ===== */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1100px){
+  .s4,.s3{grid-column:span 6;}
+  .s6{grid-column:span 6;}
+  .meta-grid{grid-template-columns:repeat(3,1fr);}
+  .cac-grid{grid-template-columns:repeat(3,1fr);}
+  .wd-intro{grid-template-columns:1fr;}
+  .footer-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:768px){
+  .nav-links{display:none;}
+  .hamburger{display:flex;}
+  .s4,.s3,.s6{grid-column:span 12;}
+  .hiw-steps{grid-template-columns:1fr 1fr;}
+  .hiw-steps::before{display:none;}
+  .testi-grid{grid-template-columns:1fr;}
+  .meta-grid{grid-template-columns:1fr 1fr;}
+  .cac-grid{grid-column:1fr 1fr;}
+  .sec{padding:70px 5%;}
+  .footer-grid{grid-template-columns:1fr;}
+  .f-bottom{flex-direction:column;align-items:flex-start;}
+}
+@media(max-width:500px){
+  .meta-grid{grid-template-columns:1fr;}
+  .cac-grid{grid-template-columns:1fr;}
+  .hiw-steps{grid-template-columns:1fr;}
+  .hero-h1{font-size:2.8rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <a href="/" class="nav-logo">
+    <img src="/logo.png" alt="Minon Solutions Logo" style="height:38px;width:auto;object-fit:contain;">
+    <div>
+      <div class="nav-logo-text">Min<span>o</span>n Solutions</div>
+      <div class="nav-rc">RC: 8965878</div>
+    </div>
+  </a>
+  <div class="nav-links">
+    <a href="#whatwedo">What We Do</a>
+    <a href="#pricing">Pricing</a>
+    <a href="/market">Market</a>
+    <a href="/food">Order Food</a>
+    <a href="/academic">Academic</a>
+    <a href="/login">Login</a>
+    <a href="/signup" class="nav-cta">Get Started →</a>
+  </div>
+  <button class="nav-theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+  <div class="hamburger" onclick="toggleMenu()" id="hamBtn"><span></span><span></span><span></span></div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#whatwedo" onclick="closeMenu()">What We Do</a>
+  <a href="#pricing" onclick="closeMenu()">Pricing</a>
+  <a href="/market" onclick="closeMenu()">Market</a>
+  <a href="/food" onclick="closeMenu()">Order Food</a>
+  <a href="/academic" onclick="closeMenu()">Academic Help</a>
+  <a href="/login" onclick="closeMenu()">Login</a>
+  <a href="/signup" class="nav-cta" onclick="closeMenu()">Get Started →</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="hero-dots"></div>
+  <div class="hero-inner">
+    <div class="hero-pill"><div class="pill-dot"></div>🇳🇬 Nigeria's All-in-One Platform</div>
+    <h1 class="hero-h1">
+      <div class="line">
+        <span class="w" style="animation:fadeUp 0.65s ease 0.05s both">Your&nbsp;</span>
+        <span class="w stroke" style="animation:fadeUp 0.65s ease 0.12s both">Central&nbsp;</span>
+        <span class="w" style="animation:fadeUp 0.65s ease 0.19s both">Hub</span>
+      </div>
+      <div class="line" style="margin-top:0.08em">
+        <span class="w" style="animation:fadeUp 0.65s ease 0.26s both">for&nbsp;</span>
+        <span class="w clr" style="animation:fadeUp 0.65s ease 0.33s both">Everything</span>
+      </div>
+    </h1>
+    <p class="hero-desc">One platform connecting you to logistics, a marketplace, food delivery, digital agency services, real estate, professional services and academic help — built for Nigeria.</p>
+    <div class="hero-btns">
+      <a href="/signup" class="btn-glow">Get Started Free →</a>
+      <a href="#whatwedo" class="btn-glass">See What We Do ↓</a>
+    </div>
+    <div class="hero-chips">
+      <span class="chip">🚚 Logistics</span>
+      <span class="chip">🛒 Marketplace</span>
+      <span class="chip">🍽️ Food Delivery</span>
+      <span class="chip">🎨 Digital Agency</span>
+      <span class="chip">📚 Study</span>
+      <span class="chip">🎓 Academic</span>
+      <span class="chip">🏠 Real Estate</span>
+      <span class="chip">🔧 Pro Services</span>
+    </div>
+  </div>
+  <div class="scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-wrap">
+    <span class="ticker-item"><span class="t-dot">◆</span>Minon Agency — Meta Ads from ₦20,000</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>Minon Logistics — Nationwide Delivery</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>Minon Market — Buy &amp; Sell Anything</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>Minon Study — WAEC, JAMB, NECO Prep</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>Minon Academic — University Projects &amp; Thesis</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>Minon Place — Order Food Online</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>Minon Professional Services — Verified Pros</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>Minon Realtors — Properties Nationwide</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>CAC Registration from ₦30,000</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>Your Partner in Growth 🚀</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>Minon Agency — Meta Ads from ₦20,000</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>Minon Logistics — Nationwide Delivery</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>Minon Market — Buy &amp; Sell Anything</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>Minon Study — WAEC, JAMB, NECO Prep</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>Minon Academic — University Projects &amp; Thesis</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>Minon Place — Order Food Online</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>Minon Professional Services — Verified Pros</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>Minon Realtors — Properties Nationwide</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>CAC Registration from ₦30,000</span>
+    <span class="ticker-item"><span class="t-dot">◆</span>Your Partner in Growth 🚀</span>
+  </div>
+</div>
+
+<!-- WHAT WE DO -->
+<section class="sec" id="whatwedo">
+  <div class="inner">
+    <!-- intro -->
+    <div class="wd-intro reveal">
+      <div>
+        <div class="eyebrow">What We Do</div>
+        <div class="wd-big">Eight branches.<br><em>One ecosystem.</em></div>
+      </div>
+      <div class="wd-right">
+        <p>Minon Solutions is Nigeria's all-in-one super-platform. Whether you're a buyer, seller, student, business owner, rider, realtor or freelancer — there's a branch built exactly for you.</p>
+        <div class="wd-stats">
+          <div><div class="wds-num">8<span>+</span></div><div class="wds-label">Service Branches</div></div>
+          <div><div class="wds-num">24<span>/7</span></div><div class="wds-label">Platform Access</div></div>
+          <div><div class="wds-num">🇳🇬</div><div class="wds-label">Nationwide</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- bento -->
+    <div class="bento">
+
+      <a href="/agency" class="bc s4 reveal" style="--accent:var(--orange);">
+        <div class="bc-ico" style="background:rgba(244,118,42,0.1);">🎨</div>
+        <div class="bc-pill" style="background:rgba(244,118,42,0.1);color:var(--orange);">Agency</div>
+        <h3>Minon Agency</h3>
+        <p>Meta Ads, CAC registration, branding, social media management and content creation. We grow your business digitally.</p>
+        <div class="bc-tags"><span class="btag">Meta Ads</span><span class="btag">CAC Reg</span><span class="btag">Branding</span></div>
+      </a>
+
+      <a href="/logistics" class="bc s4 reveal" style="--accent:var(--teal);">
+        <div class="bc-ico" style="background:rgba(46,196,182,0.1);">🚚</div>
+        <div class="bc-pill" style="background:rgba(46,196,182,0.1);color:var(--teal);">Logistics</div>
+        <h3>Minon Logistics</h3>
+        <p>Package delivery, food delivery, errands and interstate shipping. Quote-based pricing. Maximum 2 weeks nationwide.</p>
+        <div class="bc-tags"><span class="btag">Delivery</span><span class="btag">Errands</span><span class="btag">Interstate</span></div>
+      </a>
+
+      <a href="/market" class="bc s4 reveal" style="--accent:var(--violet);">
+        <div class="bc-ico" style="background:rgba(124,58,237,0.1);">🛒</div>
+        <div class="bc-pill" style="background:rgba(124,58,237,0.1);color:var(--violet);">Market</div>
+        <h3>Minon Market</h3>
+        <p>Nigeria's trusted marketplace. Buy and sell anything from verified vendors — electronics, fashion, food, agriculture and more.</p>
+        <div class="bc-tags"><span class="btag">Buy &amp; Sell</span><span class="btag">Verified Vendors</span></div>
+      </a>
+
+      <a href="/study" class="bc s6 reveal" style="--accent:var(--emerald);">
+        <div class="bc-ico" style="background:rgba(16,185,129,0.1);">📚</div>
+        <div class="bc-pill" style="background:rgba(16,185,129,0.1);color:var(--emerald);">Education</div>
+        <h3>Minon Study</h3>
+        <p>WAEC, NECO and JAMB preparation with downloadable PDF study materials, video lessons and live one-on-one classes from verified Nigerian tutors.</p>
+        <div class="bc-tags"><span class="btag">WAEC / JAMB</span><span class="btag">Live Classes</span><span class="btag">Study PDFs</span></div>
+      </a>
+
+      <a href="/academic" class="bc s6 reveal" style="--accent:var(--violet);">
+        <div class="bc-ico" style="background:rgba(124,58,237,0.1);">🎓</div>
+        <div class="bc-pill" style="background:rgba(124,58,237,0.1);color:var(--violet);">Academic</div>
+        <h3>Minon Academic</h3>
+        <p>University assignments, project work, IT / SIWES reports, research papers, thesis and dissertations — properly researched and delivered before your deadline.</p>
+        <div class="bc-tags"><span class="btag">Assignments</span><span class="btag">Thesis</span><span class="btag">FYP</span><span class="btag">Reports</span></div>
+      </a>
+
+      <a href="/food" class="bc s3 reveal" style="--accent:var(--rose);">
+        <div class="bc-ico" style="background:rgba(244,63,94,0.1);">🍽️</div>
+        <div class="bc-pill" style="background:rgba(244,63,94,0.1);color:var(--rose);">Food</div>
+        <h3>Minon Place</h3>
+        <p>Order hot meals from restaurants near you. Fast delivery by verified riders.</p>
+        <div class="bc-tags"><span class="btag">Order Food</span><span class="btag">Restaurants</span></div>
+      </a>
+
+      <a href="/services" class="bc s3 reveal" style="--accent:var(--orange);">
+        <div class="bc-ico" style="background:rgba(244,118,42,0.1);">🔧</div>
+        <div class="bc-pill" style="background:rgba(244,118,42,0.1);color:var(--orange);">Services</div>
+        <h3>Minon Pro Services</h3>
+        <p>Book verified plumbers, electricians, cleaners, carpenters and skilled professionals fast.</p>
+        <div class="bc-tags"><span class="btag">Plumbing</span><span class="btag">Electrical</span></div>
+      </a>
+
+      <a href="/realtors" class="bc s6 reveal" style="--accent:var(--gold);">
+        <div class="bc-ico" style="background:rgba(212,160,23,0.1);">🏠</div>
+        <div class="bc-pill" style="background:rgba(212,160,23,0.1);color:var(--gold);">Real Estate</div>
+        <h3>Minon Realtors</h3>
+        <p>Find properties for sale, rent, shortlet and lease across Nigeria. Houses, land, apartments, shops, offices and warehouses — listed by verified realtors. Your dream property is here.</p>
+        <div class="bc-tags"><span class="btag">For Sale</span><span class="btag">For Rent</span><span class="btag">Shortlet</span><span class="btag">All Types</span></div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="hiw" id="how">
+  <div class="hiw-glow-1"></div><div class="hiw-glow-2"></div>
+  <div class="inner">
+    <div class="hiw-head reveal">
+      <div class="eyebrow">Simple Process</div>
+      <h2 class="sec-title">How Minon Works</h2>
+    </div>
+    <div class="hiw-steps">
+      <div class="hs reveal"><div class="hs-num">01</div><h4>Create Your Account</h4><p>Sign up free as a buyer, vendor, provider, tutor, realtor, rider or student. Choose your role and get in.</p></div>
+      <div class="hs reveal"><div class="hs-num">02</div><h4>Explore or List</h4><p>Browse services, order food, find a property, shop the market — or list your own products and services to sell.</p></div>
+      <div class="hs reveal"><div class="hs-num">03</div><h4>Pay Securely</h4><p>Transfer to our Moniepoint account, upload your receipt. Our admin verifies it quickly from the dashboard.</p></div>
+      <div class="hs reveal"><div class="hs-num">04</div><h4>Get it Done</h4><p>Order confirmed, vendor notified and you track everything in real time from your personal dashboard.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-sec sec" id="pricing">
+  <div class="inner">
+    <div class="reveal">
+      <div class="eyebrow">Transparent Pricing</div>
+      <h2 class="sec-title">Clear Prices. <em>No Surprises.</em></h2>
+      <p class="sec-desc" style="margin-bottom:2.5rem;">All-inclusive packages — everything is covered.</p>
+    </div>
+    <div class="p-tabs reveal">
+      <button class="ptab on" onclick="switchTab('meta',this)">📱 Meta Ads Packages</button>
+      <button class="ptab" onclick="switchTab('cac',this)">🏢 CAC Registration</button>
+    </div>
+
+    <div class="ppanel on" id="tab-meta">
+      <div class="meta-grid">
+        <div class="mcard reveal"><div class="m-name">Starter</div><div class="m-price">₦20,000</div><ul class="m-list"><li>3 Static Creatives</li><li>1 Campaign (7 Days)</li><li>₦10,000 Ad Spend</li><li>8k–20k Impressions</li><li>150–400 Engagements</li></ul></div>
+        <div class="mcard reveal"><div class="m-name">Growth</div><div class="m-price">₦40,000</div><ul class="m-list"><li>6 Creatives (Static + Video)</li><li>2 Campaigns (14 Days)</li><li>₦25,000 Ad Spend</li><li>25k–60k Impressions</li><li>400–1k Clicks</li></ul></div>
+        <div class="mcard hot reveal"><div class="hot-tag">POPULAR</div><div class="m-name">Premium</div><div class="m-price">₦60,000</div><ul class="m-list"><li>10 Premium Creatives</li><li>3 Campaigns + Retargeting</li><li>₦40,000 Ad Spend</li><li>40k–120k+ Impressions</li><li>800–2.5k Interactions</li></ul></div>
+        <div class="mcard reveal"><div class="m-name">Pro</div><div class="m-price">₦85,000</div><ul class="m-list"><li>15 High-End Creatives</li><li>Advanced Campaigns (30 Days)</li><li>₦60,000 Ad Spend</li><li>Trackable Leads &amp; Sales</li><li>Strong ROI</li></ul></div>
+        <div class="mcard reveal"><div class="m-name">Enterprise</div><div class="m-price">₦120k<sub style="font-size:0.8rem;color:var(--text-muted);">/mo</sub></div><ul class="m-list"><li>Unlimited Creatives</li><li>Full Monthly Management</li><li>₦80k–₦100k+ Ad Spend</li><li>Dedicated Account Manager</li><li>Monthly Reports</li></ul></div>
+      </div>
+      <div class="p-note reveal">🎉 Combo Bonus — Add CAC Registration with any Meta Ads package and save ₦5,000!</div>
+      <div class="p-cta reveal"><a href="/agency" class="btn-primary">View Full Agency Packages →</a></div>
+    </div>
+
+    <div class="ppanel" id="tab-cac">
+      <div class="cac-grid">
+        <div class="ccard reveal"><div class="ccard-ico">🏢</div><div class="ccard-name">Business Name</div><div class="ccard-price">₦30,000</div><div class="ccard-sub">Certificate &amp; Status Report</div></div>
+        <div class="ccard reveal"><div class="ccard-ico">🏛️</div><div class="ccard-name">Limited Company (LTD)</div><div class="ccard-price">₦50,000</div><div class="ccard-sub">Certificate, MEMART &amp; Status Report</div></div>
+        <div class="ccard reveal"><div class="ccard-ico">⛪</div><div class="ccard-name">NGO / Church / Mosque</div><div class="ccard-price">₦130,000</div><div class="ccard-sub">Trustees, Constitution &amp; Publication</div></div>
+        <div class="ccard reveal"><div class="ccard-ico">🛡️</div><div class="ccard-name">SCUML (EFCC)</div><div class="ccard-price">₦30,000</div><div class="ccard-sub">Anti-Money Laundering</div></div>
+        <div class="ccard reveal"><div class="ccard-ico">™️</div><div class="ccard-name">Trademark</div><div class="ccard-price">₦50,000</div><div class="ccard-sub">Brand Protection Certificate</div></div>
+      </div>
+      <div class="p-note reveal">💡 Referral Commissions: Business Name ₦3,000 · LTD ₦5,000 · NGO / Church ₦7,000</div>
+      <div class="p-cta reveal"><a href="/agency" class="btn-primary">Book CAC Registration →</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testi sec" id="testimonials">
+  <div class="inner">
+    <div class="reveal" style="text-align:center;">
+      <div class="eyebrow" style="justify-content:center;">Trusted by Nigerians</div>
+      <h2 class="sec-title" style="text-align:center;">What People <em>Say</em></h2>
+    </div>
+    <div class="testi-grid">
+      <div class="tcard reveal">
+        <div class="tstars">★★★★★</div>
+        <p class="tquote">"Minon Solutions helped me register my business and run my first Meta ad campaign. The results were beyond what I expected. Truly your partner in growth."</p>
+        <div class="tauthor"><div class="tav">AO</div><div><div class="tname">Adaeze Obi</div><div class="trole">Fashion Vendor, Awka</div></div></div>
+      </div>
+      <div class="tcard reveal">
+        <div class="tstars">★★★★★</div>
+        <p class="tquote">"I found my current apartment through Minon Realtors. The process was smooth, the realtor was verified, and I was kept updated throughout."</p>
+        <div class="tauthor"><div class="tav">CU</div><div><div class="tname">Chukwuemeka Udeh</div><div class="trole">Student, Enugu</div></div></div>
+      </div>
+      <div class="tcard reveal">
+        <div class="tstars">★★★★★</div>
+        <p class="tquote">"As a dispatch rider, Minon Logistics gave me a steady stream of delivery jobs every day. My earnings have doubled since joining the platform."</p>
+        <div class="tauthor"><div class="tav">KN</div><div><div class="tname">Kelechi Nnadi</div><div class="trole">Dispatch Rider, Onitsha</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<section class="cta-band">
+  <div class="cta-inner">
+    <h2 class="reveal">Nigeria's <span>Central Hub</span><br>is here for you.</h2>
+    <p class="reveal">Sign up free today. Whether you're buying, selling, learning, delivering or building your business — Minon Solutions has a space built exactly for you.</p>
+    <div class="cta-btns reveal">
+      <a href="/signup" class="btn-glow">Create Free Account →</a>
+      <a href="https://wa.me/2348118007861" target="_blank" class="btn-wa">💬 WhatsApp Us</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="f-logo">
+        <img src="/logo.png" alt="Minon Solutions" style="height:36px;width:auto;object-fit:contain;border-radius:8px;">
+        <div class="f-name">Min<span>o</span>n Solutions</div>
+      </div>
+      <p class="f-desc">Nigeria's all-in-one platform. Your Central Hub for Everything. RC 8965878 · Awka, Anambra State.</p>
+      <div class="f-socials">
+        <a href="https://facebook.com/minonsolutions" target="_blank" class="fsoc">f</a>
+        <a href="https://instagram.com/minonsolutions" target="_blank" class="fsoc">ig</a>
+        <a href="https://twitter.com/Mikeokons" target="_blank" class="fsoc">𝕏</a>
+        <a href="https://tiktok.com/@minonsolutions" target="_blank" class="fsoc">tt</a>
+        <a href="https://wa.me/2348118007861" target="_blank" class="fsoc">wa</a>
+      </div>
+    </div>
+    <div class="f-col">
+      <h5>What We Do</h5>
+      <ul>
+        <li><a href="/agency">Minon Agency</a></li>
+        <li><a href="/logistics">Minon Logistics</a></li>
+        <li><a href="/market">Minon Market</a></li>
+        <li><a href="/study">Minon Study</a></li>
+        <li><a href="/academic">Minon Academic</a></li>
+        <li><a href="/food">Minon Place</a></li>
+        <li><a href="/services">Pro Services</a></li>
+        <li><a href="/realtors">Minon Realtors</a></li>
+      </ul>
+    </div>
+    <div class="f-col">
+      <h5>Account</h5>
+      <ul>
+        <li><a href="/signup">Sign Up Free</a></li>
+        <li><a href="/login">Login</a></li>
+        <li><a href="/buyer">Buyer Dashboard</a></li>
+        <li><a href="/vendor">Vendor Dashboard</a></li>
+        <li><a href="/admin">Admin Panel</a></li>
+      </ul>
+    </div>
+    <div class="f-col">
+      <h5>Contact</h5>
+      <ul>
+        <li><a href="https://wa.me/2348118007861" target="_blank">📱 08118007861</a></li>
+        <li><a href="mailto:minonsolutions5@gmail.com">✉️ Email Us</a></li>
+        <li><a href="#">📍 Awka, Anambra State</a></li>
+        <li><a href="https://minonsolutions.com.ng">🌐 minonsolutions.com.ng</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="f-bottom">
+    <p>© 2025 <strong>Minon Solutions</strong> · RC 8965878 · All rights reserved</p>
+    <div class="f-links">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+      <a href="#">Cookie Policy</a>
+    </div>
+  </div>
+</footer>
+
+<!-- COOKIE -->
+<div class="cookie" id="cookieBanner">
+  <div class="c-text">We use cookies to improve your experience on Minon Solutions. By continuing you agree to our <a href="#">Cookie Policy</a>.</div>
+  <div class="c-btns">
+    <button class="cbtn cbtn-ok" onclick="acceptCookie()">Accept</button>
+    <button class="cbtn cbtn-no" onclick="declineCookie()">Decline</button>
+  </div>
+</div>
+
+<script>
+/* --- THEME --- */
+let dark=localStorage.getItem('minon-theme')==='dark';
+function applyTheme(){document.documentElement.setAttribute('data-theme',dark?'dark':'light');document.getElementById('themeBtn').textContent=dark?'☀️':'🌙';}
+applyTheme();
+function toggleTheme(){dark=!dark;localStorage.setItem('minon-theme',dark?'dark':'light');applyTheme();}
+
+/* --- MOBILE MENU --- */
+let mOpen=false;
+function toggleMenu(){mOpen=!mOpen;document.getElementById('mobileMenu').style.display=mOpen?'flex':'none';}
+function closeMenu(){mOpen=false;document.getElementById('mobileMenu').style.display='none';}
+
+/* --- NAV SHADOW ON SCROLL --- */
+window.addEventListener('scroll',()=>{
+  document.getElementById('mainNav').style.boxShadow=window.scrollY>60?'0 4px 30px rgba(0,0,0,0.1)':'none';
+});
+
+/* --- REVEAL ON SCROLL --- */
+const revs=document.querySelectorAll('.reveal');
+const ro=new IntersectionObserver((entries)=>{
+  entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('visible'),i*65);ro.unobserve(e.target);}});
+},{threshold:0.07});
+revs.forEach(el=>ro.observe(el));
+
+/* --- PRICING TABS --- */
+function switchTab(name,btn){
+  document.querySelectorAll('.ppanel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('on'));
+  document.getElementById('tab-'+name).classList.add('on');
+  btn.classList.add('on');
+}
+
+/* --- COOKIE --- */
+(function(){if(!localStorage.getItem('minon-cookie'))setTimeout(()=>document.getElementById('cookieBanner').classList.add('show'),2200);})();
+function acceptCookie(){localStorage.setItem('minon-cookie','yes');document.getElementById('cookieBanner').classList.remove('show');}
+function declineCookie(){document.getElementById('cookieBanner').classList.remove('show');}
+</script>
+</body>
+</html>
